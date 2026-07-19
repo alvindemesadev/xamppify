@@ -1,11 +1,14 @@
+mod backup;
 mod commands;
 mod config_editor;
 mod database;
 mod deployment;
 mod discovery;
 mod file_browser;
+mod file_sync;
 mod log;
 mod paths;
+mod performance;
 mod service;
 mod ssl_manager;
 
@@ -171,6 +174,7 @@ pub fn run() {
             commands::service_commands::restart_service,
             commands::service_commands::get_service_status,
             commands::log_commands::get_logs,
+            commands::log_commands::start_log_watcher,
             commands::file_commands::list_directory,
             commands::file_commands::read_file,
             commands::file_commands::write_file,
@@ -195,6 +199,12 @@ pub fn run() {
             commands::ssl_commands::list_certificates,
             commands::ssl_commands::read_certificate,
             commands::ssl_commands::generate_self_signed,
+            commands::file_sync_commands::sync_to_remote,
+            commands::backup_commands::create_backup,
+            commands::backup_commands::list_backups,
+            commands::backup_commands::delete_backup,
+            commands::backup_commands::dump_mysql,
+            commands::performance_commands::get_local_performance,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

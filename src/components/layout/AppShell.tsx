@@ -10,6 +10,7 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   const sidebarOpen = useUiStore((s) => s.sidebarOpen);
   const theme = useUiStore((s) => s.theme);
+  const compactMode = useUiStore((s) => s.compactMode);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
@@ -21,7 +22,7 @@ export function AppShell({ children }: AppShellProps) {
         <Sidebar collapsed={!sidebarOpen} />
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <TopBar />
-          <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain">{children}</main>
+          <main className={`min-h-0 flex-1 overflow-y-auto overscroll-contain ${compactMode ? "p-2" : ""}`}>{children}</main>
         </div>
       </div>
     </div>

@@ -29,6 +29,7 @@ mdns-sd = "0.12"
 reqwest = { version = "0.12", features = ["json"] }
 mysql_async = "0.34"
 chrono = { version = "0.4", features = ["serde"] }
+notify = "7"
 
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
