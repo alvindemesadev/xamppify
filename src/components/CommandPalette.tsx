@@ -72,7 +72,7 @@ export function CommandPalette() {
               if (e.key === "Enter" && filtered[selectedIdx]) { execute(filtered[selectedIdx]); }
             }}
             placeholder="Search pages…"
-            className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 h-11 text-sm"
+            className="border-0 bg-transparent shadow-none focus-visible:ring-0 h-11 text-sm"
           />
         </div>
         <div className="max-h-80 overflow-y-auto p-1.5">
