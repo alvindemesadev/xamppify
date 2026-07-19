@@ -29,7 +29,7 @@ export default function Settings() {
             <span className="text-sm text-muted-foreground">Compact monitoring mode</span>
             <button
               onClick={toggleCompactMode}
-              className={`relative h-6 w-11 rounded-full transition-colors ${compactMode ? "bg-primary" : "bg-secondary"}`}
+              className={`relative h-6 w-11 rounded-full transition-colors ${compactMode ? "bg-primary" : "bg-border"}`}
             >
               <span className={`absolute top-0.5 block h-5 w-5 rounded-full bg-white transition-transform ${compactMode ? "translate-x-5" : "translate-x-0.5"}`} />
             </button>
