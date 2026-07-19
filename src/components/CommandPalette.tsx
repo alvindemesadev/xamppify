@@ -60,7 +60,7 @@ export function CommandPalette() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent showCloseButton={false} className="top-[12%] -translate-y-0 w-full max-w-lg p-0 overflow-hidden">
-        <div className="flex items-center gap-3 border-b border-border px-4">
+        <div className="flex items-center gap-3 border-b border-border px-4 py-1.5">
           <Search className="size-4 shrink-0 text-muted-foreground" />
           <Input
             ref={inputRef}
