@@ -7,6 +7,7 @@ pub struct Deployment {
     pub name: String,
     pub path: String,
     pub url: String,
+    pub network_url: String,
     pub modified: String,
 }
 
@@ -56,8 +57,12 @@ fn deployment_from_path(path: &Path) -> Result<Deployment, String> {
         .and_then(|name| name.to_str())
         .ok_or_else(|| "Invalid deployment name".to_string())?
         .to_string();
+    let port = crate::paths::apache_port();
+    let port_suffix = if port == 80 { String::new() } else { format!(":{}", port) };
+    let ip = crate::paths::local_ip();
     Ok(Deployment {
-        url: format!("http://localhost/{name}/"),
+        url: format!("http://localhost{port_suffix}/{name}/"),
+        network_url: format!("http://{ip}{port_suffix}/{name}/"),
         name,
         path: path.to_string_lossy().to_string(),
         modified,

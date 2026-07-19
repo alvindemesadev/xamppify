@@ -116,6 +116,45 @@ pub fn ensure_existing_path_in_xampp(path: &Path) -> Result<PathBuf, String> {
     }
 }
 
+/// Reads the Apache `Listen` directive from httpd.conf to get the configured port.
+/// Falls back to 80 if not found.
+pub fn apache_port() -> u16 {
+    let conf_path = xampp_root().join(r"apache\conf\httpd.conf");
+    let content = std::fs::read_to_string(conf_path).ok();
+    let content = match content {
+        Some(c) => c,
+        None => return 80,
+    };
+    for line in content.lines() {
+        let line = line.trim();
+        if line.starts_with("Listen ") {
+            let rest = line.trim_start_matches("Listen ").trim();
+            // Handles "Listen 80", "Listen 0.0.0.0:80", "Listen [::]:80"
+            if let Some(port_str) = rest.rsplit(':').next() {
+                if let Ok(port) = port_str.parse::<u16>() {
+                    return port;
+                }
+            }
+        }
+    }
+    80
+}
+
+/// Returns the primary LAN IPv4 address using a UDP trick (no data sent).
+pub fn local_ip() -> String {
+    if let Ok(socket) = std::net::UdpSocket::bind("0.0.0.0:0") {
+        if socket.connect("8.8.8.8:80").is_ok() {
+            if let Ok(local_addr) = socket.local_addr() {
+                let ip = local_addr.ip();
+                if !ip.is_loopback() {
+                    return ip.to_string();
+                }
+            }
+        }
+    }
+    "127.0.0.1".to_string()
+}
+
 pub fn ensure_writable_path_in_xampp(path: &Path) -> Result<PathBuf, String> {
     let root = canonical_xampp_root()?;
     let parent = path

@@ -67,5 +67,6 @@ export interface Deployment {
   name: string;
   path: string;
   url: string;
+  network_url: string;
   modified: string;
 }
