@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, Command, CornerDownLeft } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useHotkeys } from "@/hooks/use-hotkeys";
@@ -59,8 +59,8 @@ export function CommandPalette() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent showCloseButton={false} className="top-[15%] -translate-y-0 p-0">
-        <div className="flex items-center gap-2 border-b border-border px-4">
+      <DialogContent showCloseButton={false} className="top-[12%] -translate-y-0 w-full max-w-lg p-0 overflow-hidden">
+        <div className="flex items-center gap-3 border-b border-border px-4">
           <Search className="size-4 shrink-0 text-muted-foreground" />
           <Input
             ref={inputRef}
@@ -72,22 +72,53 @@ export function CommandPalette() {
               if (e.key === "Enter" && filtered[selectedIdx]) { execute(filtered[selectedIdx]); }
             }}
             placeholder="Search pages…"
-            className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
+            className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0 h-11 text-sm"
           />
         </div>
-        <div className="max-h-72 overflow-y-auto p-2">
-          {filtered.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">No results</p>}
+        <div className="max-h-80 overflow-y-auto p-1.5">
+          {filtered.length === 0 && (
+            <div className="flex flex-col items-center gap-1 py-10">
+              <p className="text-sm text-muted-foreground">No results</p>
+              <p className="text-xs text-muted-foreground/60">Try a different search term</p>
+            </div>
+          )}
           {filtered.map((action, i) => (
             <button
               key={action.id}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm ${i === selectedIdx ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}
+              className={`flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm transition-colors ${
+                i === selectedIdx
+                  ? "bg-primary text-primary-foreground"
+                  : "text-foreground hover:bg-muted"
+              }`}
               onClick={() => execute(action)}
               onMouseEnter={() => setSelectedIdx(i)}
             >
-              <ArrowRight className="size-3.5 shrink-0 text-muted-foreground" />
-              <span>{action.label}</span>
+              <ArrowRight className={`size-3.5 shrink-0 ${i === selectedIdx ? "text-primary-foreground/70" : "text-muted-foreground"}`} />
+              <span className="flex-1">{action.label}</span>
+              {i === selectedIdx && (
+                <CornerDownLeft className="size-3.5 shrink-0 text-primary-foreground/50" />
+              )}
             </button>
           ))}
+        </div>
+        <div className="flex items-center gap-4 border-t border-border px-4 py-2">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
+            <kbd className="flex size-4 items-center justify-center rounded border border-border bg-muted text-[10px] font-medium text-muted-foreground">
+              {isMac ? <Command className="size-2.5" /> : "^"}
+            </kbd>
+            <span>K</span>
+            <span className="mx-1">to toggle</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
+            <kbd className="flex items-center gap-0.5 rounded border border-border bg-muted px-1 py-0.5 text-[10px] font-medium text-muted-foreground">
+              <span>↑</span><span>↓</span>
+            </kbd>
+            <span>to navigate</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
+            <CornerDownLeft className="size-3" />
+            <span>to open</span>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
