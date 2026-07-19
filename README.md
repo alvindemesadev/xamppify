@@ -2,7 +2,7 @@
 
 > Your local PHP workspace, simplified.
 
-Xamppify is a Windows desktop workspace for developing and managing projects in a local XAMPP installation. It brings deployments, files, configuration, logs, databases, SSL certificates, backups, file sync, and performance monitoring into one Tauri desktop application.
+Xamppify is a Windows desktop workspace for developing and managing projects in a local XAMPP installation. It brings deployments, files, configuration, logs, databases, SSL certificates, file sync, and performance monitoring into one Tauri desktop application.
 
 ## What it does
 
@@ -17,7 +17,6 @@ Xamppify is a Windows desktop workspace for developing and managing projects in 
 - Edits known Apache, PHP, MySQL, and phpMyAdmin configuration files with a **CodeMirror editor**.
 - Lists certificate/key files, reads certificate metadata, and creates self-signed certificates; shows **expiring-cert badge** in the sidebar.
 - Starts, stops, restarts, and monitors local XAMPP services without showing terminal windows.
-- **Creates and manages htdocs backups** (zip via PowerShell) and **MySQL dumps** (via `mysqldump`).
 - **Syncs files to remote machines** over the LAN using `robocopy`.
 - **Monitors local machine performance** — CPU, memory, disk usage, and uptime — refreshed every 5 seconds via WMI.
 - **Ctrl+K / Cmd+K command palette** for instant page navigation.
@@ -31,8 +30,6 @@ Xamppify is a Windows desktop workspace for developing and managing projects in 
 - A local XAMPP installation (default: `C:\xampp`)
 - Apache and/or MySQL running when using their respective sites, logs, or database features
 - OpenSSL bundled with XAMPP for certificate inspection and generation
-- PowerShell 5.0+ for backup compression
-
 Xamppify is designed around a local XAMPP installation. It does not install, configure, or distribute XAMPP itself.
 
 ## Install
@@ -84,14 +81,6 @@ The **Config** page exposes known local XAMPP configuration files with a **CodeM
 
 The **Logs** page uses a **real-time filesystem watcher** (`notify` crate) to stream Apache and MySQL/MariaDB log entries as they are written — no polling. Filter by level, toggle auto-scroll, and copy individual lines on hover. Missing-log messages usually mean the relevant service has not started yet, logging is disabled, or the XAMPP version stores the log under another name. Service controls show the current local service state.
 
-### Backups
-
-The **Backups** page creates zip archives of `htdocs` and SQL dumps of all MySQL databases.
-
-- **Create backup** zips `htdocs` into `{XAMPP_HOME}/backups/`.
-- **MySQL dump** runs `mysqldump --all-databases` to produce a `.sql` snapshot.
-- List, inspect size, and delete backups from the grid.
-
 ### File Sync
 
 The **File Sync** page copies files from a local source to a remote machine using `robocopy /MIR`. Configure source path, remote host, and destination path, then review sync history.
@@ -115,7 +104,7 @@ Press **Ctrl+K** (Windows/Linux) or **Cmd+K** (macOS) to open the command palett
 
 Xamppify constrains its file, config, certificate, and deployment operations to the configured XAMPP root. Path traversal, absolute paths outside that root, and unsafe deployment names are rejected by the Rust backend.
 
-File uploads are preflighted before copying. If an upload fails mid-operation, Xamppify removes files it created during that operation where possible. This is a safeguard, not a substitute for source control or backups.
+File uploads are preflighted before copying. If an upload fails mid-operation, Xamppify removes files it created during that operation where possible. This is a safeguard, not a substitute for source control.
 
 ## Development
 

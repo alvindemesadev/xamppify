@@ -23,7 +23,7 @@ Rust domain modules ──► XAMPP files, services, MySQL, OpenSSL, WMI, roboco
 - `DatabaseManager.tsx` — MySQL connection, browsing, queries, and export.
 - `ConfigEditor.tsx` — known XAMPP configuration files with CodeMirror editor.
 - `SslManager.tsx` — certificates, keys, and self-signed generation with expiring-cert badge.
-- `Backups.tsx` — htdocs zip backups and MySQL dumps with list/delete.
+
 - `FileSync.tsx` — robocopy-based file sync to remote machines.
 - `Performance.tsx` — real-time CPU/memory/disk gauges via WMI.
 - `Settings.tsx` — theme, compact mode, XAMPP location, setup checks.
@@ -52,7 +52,6 @@ React Query invalidates data after mutations so the file browser, deployments, a
 - `ssl_manager/` — certificate discovery, inspection, and self-signed creation.
 - `service/` — local service commands (`sc.exe`) and remote status checks.
 - `discovery/` — mDNS, port scanning, heartbeat tracking, and manual machine entries.
-- `backup/` — `htdocs` zip backup via PowerShell `Compress-Archive` and MySQL dump via `mysqldump`; list and delete operations.
 - `file_sync/` — `robocopy` wrapper for `/MIR` sync to a remote UNC path.
 - `performance/` — WMI query execution via PowerShell for CPU, memory, disk, and uptime metrics.
 
