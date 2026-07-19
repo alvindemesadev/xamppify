@@ -2,21 +2,28 @@
 
 > Your local PHP workspace, simplified.
 
-Xamppify is a Windows desktop workspace for developing and managing projects in a local XAMPP installation. It brings deployments, files, configuration, logs, databases, and SSL certificates into one Tauri desktop application.
+Xamppify is a Windows desktop workspace for developing and managing projects in a local XAMPP installation. It brings deployments, files, configuration, logs, databases, SSL certificates, backups, file sync, and performance monitoring into one Tauri desktop application.
 
 ## What it does
 
 - Creates HTML or PHP starter projects directly in `htdocs`.
 - Imports an existing project folder without altering the original source folder.
 - Opens project URLs in the default browser and provides one-click access to project files.
+- Shows both **Local URL** and **Network URL** (auto-detected LAN IP + Apache port from `httpd.conf`).
 - Lets you hide non-project `htdocs` folders from the deployment grid without deleting them.
 - Browses, edits, creates, renames, uploads, and deletes files and folders inside the configured XAMPP installation.
-- Reads Apache and MySQL/MariaDB logs with filtering and clear unavailable-log states.
+- Reads Apache and MySQL/MariaDB logs with **real-time streaming** (filesystem watcher via `notify` crate) and filter controls.
 - Connects to MySQL, browses databases and tables, runs queries, and exports databases.
-- Edits known Apache, PHP, MySQL, and phpMyAdmin configuration files.
-- Lists certificate/key files, reads certificate metadata, and creates self-signed certificates.
-- Starts, stops, restarts, and monitors local XAMPP services; the underlying commands run without showing a terminal window.
+- Edits known Apache, PHP, MySQL, and phpMyAdmin configuration files with a **CodeMirror editor**.
+- Lists certificate/key files, reads certificate metadata, and creates self-signed certificates; shows **expiring-cert badge** in the sidebar.
+- Starts, stops, restarts, and monitors local XAMPP services without showing terminal windows.
+- **Creates and manages htdocs backups** (zip via PowerShell) and **MySQL dumps** (via `mysqldump`).
+- **Syncs files to remote machines** over the LAN using `robocopy`.
+- **Monitors local machine performance** — CPU, memory, disk usage, and uptime — refreshed every 5 seconds via WMI.
+- **Ctrl+K / Cmd+K command palette** for instant page navigation.
+- **Toggle compact mode** for reduced padding; switch between dark and light theme from the sidebar.
 - Retains LAN-discovery support for compatible remote XAMPP machines.
+- All child processes (robocopy, mysqldump, PowerShell, OpenSSL, service commands) execute with **hidden console windows**.
 
 ## Requirements
 
@@ -24,6 +31,7 @@ Xamppify is a Windows desktop workspace for developing and managing projects in 
 - A local XAMPP installation (default: `C:\xampp`)
 - Apache and/or MySQL running when using their respective sites, logs, or database features
 - OpenSSL bundled with XAMPP for certificate inspection and generation
+- PowerShell 5.0+ for backup compression
 
 Xamppify is designed around a local XAMPP installation. It does not install, configure, or distribute XAMPP itself.
 
@@ -56,6 +64,7 @@ The **Deployments** page represents folders within `htdocs`.
 - **Import project** copies a selected source folder into `htdocs` and keeps its original source untouched.
 - **Customize** opens that deployment in the file workspace.
 - **Open site** opens its localhost URL in the default browser.
+- **Copy Local / Copy Network** copies the localhost or LAN URL to the clipboard.
 - **Hide** removes a folder from the grid only; it neither moves nor deletes files. Use **Hidden** to restore it.
 - **Delete** permanently deletes the selected deployment folder after confirmation.
 
@@ -69,11 +78,38 @@ Use **Database** to connect to MySQL, inspect databases and tables, run queries,
 
 ### Config and SSL
 
-The **Config** page exposes known local XAMPP configuration files and saves directly to the selected file. The **SSL** page shows available certificate and key files, displays certificate details, and can generate self-signed certificates. Restart Apache if a configuration or certificate change requires it.
+The **Config** page exposes known local XAMPP configuration files with a **CodeMirror editor** (syntax highlighting, line wrapping, find-in-file). The **SSL** page shows available certificate and key files, displays certificate details, and can generate self-signed certificates. Restart Apache if a configuration or certificate change requires it.
 
 ### Logs and services
 
-The **Logs** page reads Apache and MySQL/MariaDB logs when they are available. Missing-log messages usually mean the relevant service has not started yet, logging is disabled, or the XAMPP version stores the log under another name. Service controls show the current local service state.
+The **Logs** page uses a **real-time filesystem watcher** (`notify` crate) to stream Apache and MySQL/MariaDB log entries as they are written — no polling. Filter by level, toggle auto-scroll, and copy individual lines on hover. Missing-log messages usually mean the relevant service has not started yet, logging is disabled, or the XAMPP version stores the log under another name. Service controls show the current local service state.
+
+### Backups
+
+The **Backups** page creates zip archives of `htdocs` and SQL dumps of all MySQL databases.
+
+- **Create backup** zips `htdocs` into `{XAMPP_HOME}/backups/`.
+- **MySQL dump** runs `mysqldump --all-databases` to produce a `.sql` snapshot.
+- List, inspect size, and delete backups from the grid.
+
+### File Sync
+
+The **File Sync** page copies files from a local source to a remote machine using `robocopy /MIR`. Configure source path, remote host, and destination path, then review sync history.
+
+### Performance
+
+The **Performance** page displays real-time CPU, memory, and disk usage gauges refreshed every 5 seconds via PowerShell WMI queries. Also shows memory details, disk details, and system uptime.
+
+### Settings
+
+- **Theme** — toggle between dark and light mode (also available from the sidebar).
+- **Compact mode** — reduces interface padding for a denser layout.
+- **XAMPP location** — set via the `XAMPP_HOME` environment variable.
+- **Setup checks** — re-run the first-launch validation.
+
+### Command palette
+
+Press **Ctrl+K** (Windows/Linux) or **Cmd+K** (macOS) to open the command palette. Start typing a page name to filter, then press Enter or click to navigate.
 
 ## Safety model
 
