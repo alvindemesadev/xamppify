@@ -166,7 +166,6 @@ pub async fn run_query(query: &str) -> Result<QueryResult, String> {
 }
 
 pub async fn export_database(database: &str) -> Result<String, String> {
-    let tables = list_tables(database).await?;
     let mut output = String::new();
     output.push_str(&format!("-- Export of database: {}\n\n", database));
 
@@ -176,6 +175,11 @@ pub async fn export_database(database: &str) -> Result<String, String> {
         .get_conn()
         .await
         .map_err(|e| format!("Connection failed: {}", e))?;
+
+    let tables: Vec<String> = conn
+        .query(format!("SHOW TABLES FROM {}", quote_identifier(database)))
+        .await
+        .map_err(|e| format!("Failed to list tables: {}", e))?;
 
     for table in &tables {
         let create_rows: Vec<Row> = conn

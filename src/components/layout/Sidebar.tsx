@@ -1,10 +1,10 @@
 import { NavLink } from "react-router-dom";
-import { Boxes, Monitor, Folder, Database, FileCode, ShieldCheck, Settings } from "lucide-react";
+import { Boxes, ScrollText, Folder, Database, FileCode, ShieldCheck, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { to: "/", icon: Boxes, label: "Deployments" },
-  { to: "/logs", icon: Monitor, label: "Logs" },
+  { to: "/logs", icon: ScrollText, label: "Logs" },
   { to: "/files", icon: Folder, label: "Files" },
   { to: "/database", icon: Database, label: "Database" },
   { to: "/config", icon: FileCode, label: "Config" },

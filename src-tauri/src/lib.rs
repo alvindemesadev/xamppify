@@ -82,13 +82,6 @@ pub struct FileEntry {
     pub is_dir: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct QueryResult {
-    pub columns: Vec<String>,
-    pub rows: Vec<std::collections::HashMap<String, serde_json::Value>>,
-    pub affected_rows: u64,
-}
-
 #[derive(Debug, Clone, Serialize)]
 pub struct AppHealth {
     pub xampp_root: String,
@@ -116,8 +109,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_shell::init())
-        .plugin(tauri_plugin_fs::init())
+
         .manage(AppState {
             registry: MachineRegistry::new_shared(),
             heartbeat_tracker: discovery::heartbeat::HeartbeatTracker::new_shared(),

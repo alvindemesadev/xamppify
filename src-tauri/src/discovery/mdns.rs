@@ -60,7 +60,7 @@ pub async fn start_mdns_discovery(
 
                     info!("Discovered service: {} at {}:{}", hostname, address, port);
 
-                    if is_apache_server(address, port).await {
+                    if is_apache_server_on(address, port).await {
                         let machine = Machine {
                             id: address.to_string(),
                             hostname: hostname.trim_end_matches('.').to_string(),
@@ -97,30 +97,6 @@ pub async fn start_mdns_discovery(
     let _ = daemon.shutdown();
 }
 
-async fn is_apache_server(ip: std::net::IpAddr, port: u16) -> bool {
-    let url = format!("http://{}:{}", ip, port);
-    let client = reqwest::Client::builder()
-        .timeout(Duration::from_secs(3))
-        .danger_accept_invalid_certs(true)
-        .build()
-        .ok();
-
-    let client = match client {
-        Some(c) => c,
-        None => return false,
-    };
-
-    match client.get(&url).send().await {
-        Ok(response) => {
-            let server_header = response
-                .headers()
-                .get(reqwest::header::SERVER)
-                .and_then(|v| v.to_str().ok())
-                .unwrap_or("")
-                .to_lowercase();
-
-            server_header.contains("apache") || server_header.contains("xampp")
-        }
-        Err(_) => false,
-    }
+async fn is_apache_server_on(ip: std::net::IpAddr, port: u16) -> bool {
+    crate::discovery::http_check::is_apache_server(&format!("http://{}:{}", ip, port), 3).await
 }

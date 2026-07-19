@@ -1,4 +1,5 @@
 pub mod heartbeat;
+pub mod http_check;
 pub mod mdns;
 pub mod port_scanner;
 

@@ -17,13 +17,14 @@ pub fn parse_apache_log(content: &str, max_lines: Option<usize>) -> Vec<LogLine>
     lines
         .iter()
         .map(|line| {
-            let (level, message) = if line.contains("[error]") {
+            let lower = line.to_lowercase();
+            let (level, message) = if lower.contains("[error]") || lower.contains("error") {
                 ("ERROR", line.to_string())
-            } else if line.contains("[warn]") {
+            } else if lower.contains("[warn]") || lower.contains("warning") {
                 ("WARN", line.to_string())
-            } else if line.contains("[info]") {
+            } else if lower.contains("[info]") {
                 ("INFO", line.to_string())
-            } else if line.contains("[debug]") {
+            } else if lower.contains("[debug]") {
                 ("DEBUG", line.to_string())
             } else {
                 ("INFO", line.to_string())
@@ -58,9 +59,10 @@ pub fn parse_mysql_log(content: &str, max_lines: Option<usize>) -> Vec<LogLine> 
     lines
         .iter()
         .map(|line| {
-            let level = if line.contains("[ERROR]") || line.contains("Error") {
+            let lower = line.to_lowercase();
+            let level = if lower.contains("[error]") || lower.contains("error") {
                 "ERROR"
-            } else if line.contains("[Warning]") || line.contains("Warning") {
+            } else if lower.contains("[warn]") || lower.contains("warning") {
                 "WARN"
             } else {
                 "INFO"

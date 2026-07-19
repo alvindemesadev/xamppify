@@ -142,29 +142,5 @@ async fn check_port(ip: Ipv4Addr, port: u16) -> bool {
 }
 
 async fn is_apache_http(ip: Ipv4Addr) -> bool {
-    let url = format!("http://{}/", ip);
-    let client = reqwest::Client::builder()
-        .timeout(Duration::from_secs(2))
-        .danger_accept_invalid_certs(true)
-        .build()
-        .ok();
-
-    let client = match client {
-        Some(c) => c,
-        None => return false,
-    };
-
-    match client.get(&url).send().await {
-        Ok(response) => {
-            let server_header = response
-                .headers()
-                .get(reqwest::header::SERVER)
-                .and_then(|v| v.to_str().ok())
-                .unwrap_or("")
-                .to_lowercase();
-
-            server_header.contains("apache") || server_header.contains("xampp")
-        }
-        Err(_) => false,
-    }
+    crate::discovery::http_check::is_apache_server(&format!("http://{}/", ip), 2).await
 }

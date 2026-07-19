@@ -234,13 +234,11 @@ fn safe_filename(common_name: &str) -> String {
             }
         })
         .collect();
-    filename
-        .trim_matches('_')
-        .to_string()
-        .chars()
-        .take(96)
-        .collect::<String>()
-        .max("certificate".to_string())
+    let trimmed = filename.trim_matches('_').to_string();
+    if trimmed.is_empty() {
+        return "certificate".to_string();
+    }
+    trimmed.chars().take(96).collect()
 }
 
 #[cfg(test)]
@@ -250,6 +248,11 @@ mod tests {
     #[test]
     fn sanitizes_certificate_filename() {
         assert_eq!(safe_filename("dev site/example"), "dev_site_example");
+    }
+
+    #[test]
+    fn falls_back_to_certificate_when_empty() {
+        assert_eq!(safe_filename("///"), "certificate");
     }
 
     #[test]
