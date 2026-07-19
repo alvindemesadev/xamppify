@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { Boxes, ScrollText, Folder, Database, FileCode, ShieldCheck, Settings, HardDrive, Archive, ArrowRightFromLine, Sun, Moon } from "lucide-react";
+import { Boxes, ScrollText, Folder, Database, FileCode, ShieldCheck, Settings, HardDrive, ArrowRightFromLine, Sun, Moon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCertExpiry } from "@/hooks/use-cert-expiry";
 import { useUiStore } from "@/stores/ui-store";
@@ -12,7 +12,6 @@ const navItems = [
   { to: "/database", icon: Database, label: "Database" },
   { to: "/config", icon: FileCode, label: "Config" },
   { to: "/ssl", icon: ShieldCheck, label: "SSL" },
-  { to: "/backups", icon: Archive, label: "Backups" },
   { to: "/file-sync", icon: ArrowRightFromLine, label: "File Sync" },
   { to: "/performance", icon: HardDrive, label: "Performance" },
   { to: "/settings", icon: Settings, label: "Settings" },

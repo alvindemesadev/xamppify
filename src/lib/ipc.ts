@@ -69,13 +69,6 @@ export const readCertificate = (path: string) =>
   }>("read_certificate", { path });
 export const syncToRemote = (source: string, destination: string, remoteHost: string) =>
   invoke<{ success: boolean; output: string; files_copied: number }>("sync_to_remote", { source, destination, remoteHost });
-export const createBackup = (name?: string) =>
-  invoke<{ name: string; path: string; size: number; created: string }>("create_backup", { name });
-export const listBackups = () =>
-  invoke<{ name: string; path: string; size: number; created: string }[]>("list_backups");
-export const deleteBackup = (name: string) =>
-  invoke<void>("delete_backup", { name });
-export const dumpMysql = () => invoke<string>("dump_mysql");
 export const getLocalPerformance = () =>
   invoke<{ cpu_percent: number; memory_percent: number; memory_used_gb: number; memory_total_gb: number; disk_percent: number; disk_free_gb: number; disk_total_gb: number; uptime_days: number }>("get_local_performance");
 export const generateSelfSigned = (commonName: string, days: number) =>

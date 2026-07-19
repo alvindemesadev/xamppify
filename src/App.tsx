@@ -9,7 +9,6 @@ import SslManager from "@/pages/SslManager";
 import FileBrowser from "@/pages/FileBrowser";
 import Logs from "@/pages/Logs";
 import Settings from "@/pages/Settings";
-import Backups from "@/pages/Backups";
 import FileSync from "@/pages/FileSync";
 import Performance from "@/pages/Performance";
 import { Onboarding } from "@/components/layout/Onboarding";
@@ -38,7 +37,6 @@ function App() {
             <Route path="/config" element={<ConfigEditor />} />
             <Route path="/ssl" element={<SslManager />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/backups" element={<Backups />} />
             <Route path="/file-sync" element={<FileSync />} />
             <Route path="/performance" element={<Performance />} />
           </Routes>

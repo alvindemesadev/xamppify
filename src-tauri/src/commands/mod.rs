@@ -1,4 +1,3 @@
-pub mod backup_commands;
 pub mod config_commands;
 pub mod database_commands;
 pub mod file_sync_commands;

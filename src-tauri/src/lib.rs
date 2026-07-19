@@ -1,4 +1,3 @@
-mod backup;
 mod commands;
 mod config_editor;
 mod database;
@@ -200,10 +199,6 @@ pub fn run() {
             commands::ssl_commands::read_certificate,
             commands::ssl_commands::generate_self_signed,
             commands::file_sync_commands::sync_to_remote,
-            commands::backup_commands::create_backup,
-            commands::backup_commands::list_backups,
-            commands::backup_commands::delete_backup,
-            commands::backup_commands::dump_mysql,
             commands::performance_commands::get_local_performance,
         ])
         .run(tauri::generate_context!())

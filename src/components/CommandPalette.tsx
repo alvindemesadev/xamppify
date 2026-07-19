@@ -19,7 +19,6 @@ const defaultActions: Action[] = [
   { id: "database", label: "Go to Database", to: "/database" },
   { id: "config", label: "Go to Config", to: "/config" },
   { id: "ssl", label: "Go to SSL", to: "/ssl" },
-  { id: "backups", label: "Go to Backups", to: "/backups" },
   { id: "file-sync", label: "Go to File Sync", to: "/file-sync" },
   { id: "performance", label: "Go to Performance", to: "/performance" },
   { id: "settings", label: "Go to Settings", to: "/settings" },
