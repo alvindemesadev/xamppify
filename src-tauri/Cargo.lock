@@ -6384,7 +6384,7 @@ dependencies = [
 
 [[package]]
 name = "xamppify"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "chrono",
  "local-ip-address",

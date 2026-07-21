@@ -22,7 +22,7 @@ export function AppShell({ children }: AppShellProps) {
         <Sidebar collapsed={!sidebarOpen} />
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <TopBar />
-          <main className={`min-h-0 flex-1 overflow-y-auto overscroll-contain ${compactMode ? "p-2" : ""}`}>{children}</main>
+          <main className={`app-main-scroll-region min-h-0 flex-1 overflow-y-auto overscroll-contain ${compactMode ? "p-2" : ""}`}>{children}</main>
         </div>
       </div>
     </div>
