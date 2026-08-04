@@ -1,11 +1,11 @@
 {
-    "version":  "0.4.0",
-    "notes":  "Full roadmap completion - native Win32 performance, Recycle Bin support, file logging, ripgrep search, MySQL credential manager, deployment zip backups, scheduled file sync, image preview, config safety, log upgrades, route splitting, and 21 passing tests",
-    "pub_date":  "2026-08-04T15:39:12.8508572Z",
+    "version":  "0.4.1",
+    "notes":  "Responsive layout across all pages -- fluid inputs, flex-wrap button bars, adaptive grids, column sizing, truncation",
+    "pub_date":  "2026-08-04T16:15:34.1223857Z",
     "platforms":  {
                       "windows-x86_64":  {
-                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTRk1HbmVkeXlNdkJaa0E3ZDhGUmtwcVErOTA0TEV2YnQ3VmtGSXNuUnMyUE1ncVg4VFBmekxNU2FXaFJjb213MGRKSmNrOGJmSE9CdWs5OER3NzFRajA4UjBtaXNhZEFRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1ODU3OTE3CWZpbGU6WGFtcHBpZnlfMC40LjBfeDY0LXNldHVwLmV4ZQpWK3J3b0tWbGJWVTNPTWN2bTI4TXJDS3dZa2QzbWFJKzgvRGdUdWU5ZThVeml3REFMRVovQmwzQiszc3NTczJHcXZ3OXg3UldKa29jVmJKbEYzWmJDdz09Cg==",
-                                             "url":  "https://github.com/alvindemesadev/xamppify/releases/download/v0.4.0/Xamppify_0.4.0_x64-setup.exe"
+                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTRk1HbmVkeXlNdk5zLzB5ekxWNXVHekw4b2VUeVJRaEtQVE9ZY0V2TURiSzZXd0xUQm1vaHQ3Yzg5OWFQYTcwaUZJa3dUYW9QOUptVm5VanBnekd2RU4xNmNHYzdGT2c0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1ODYwMTI2CWZpbGU6WGFtcHBpZnlfMC40LjFfeDY0LXNldHVwLmV4ZQo1UEhnV1BJNEdxbEV0QzlIbVM5OEZBblFuZWNnb3BoS25kbHJNYmEwaHRFR0NoNEtYMlZWU045cXVxM3NXZGJzSGFBSzBiUHdpL09aWG00aHQzTVZDUT09Cg==",
+                                             "url":  "https://github.com/alvindemesadev/xamppify/releases/download/v0.4.1/Xamppify_0.4.1_x64-setup.exe"
                                          }
                   }
 }
