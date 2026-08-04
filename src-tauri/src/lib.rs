@@ -199,6 +199,9 @@ pub fn run() {
             commands::ssl_commands::read_certificate,
             commands::ssl_commands::generate_self_signed,
             commands::file_sync_commands::sync_to_remote,
+            commands::file_sync_commands::test_remote_connection,
+            commands::file_sync_commands::get_sync_history,
+            commands::file_sync_commands::clear_sync_history,
             commands::performance_commands::get_local_performance,
         ])
         .run(tauri::generate_context!())

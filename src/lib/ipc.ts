@@ -67,8 +67,51 @@ export const readCertificate = (path: string) =>
     valid_to: string;
     san: string[];
   }>("read_certificate", { path });
-export const syncToRemote = (source: string, destination: string, remoteHost: string) =>
-  invoke<{ success: boolean; output: string; files_copied: number }>("sync_to_remote", { source, destination, remoteHost });
+export const syncToRemote = (
+  source: string,
+  destination: string,
+  remoteHost: string,
+  username?: string,
+  password?: string
+) =>
+  invoke<{ success: boolean; output: string; files_copied: number }>("sync_to_remote", {
+    source,
+    destination,
+    remoteHost,
+    username: username || null,
+    password: password || null,
+  });
+
+export const testRemoteConnection = (
+  remoteHost: string,
+  destination: string,
+  username?: string,
+  password?: string
+) =>
+  invoke<{
+    ping_ok: boolean;
+    smb_port_ok: boolean;
+    share_accessible: boolean;
+    unc_path: string;
+    message: string;
+    suggestions: string[];
+  }>("test_remote_connection", {
+    remoteHost,
+    destination,
+    username: username || null,
+    password: password || null,
+  });
+
+export type SyncHistoryEntry = {
+  timestamp: string;
+  result: "success" | "error";
+  message: string;
+  remote_host: string;
+  source: string;
+  destination: string;
+};
+export const getSyncHistory = () => invoke<SyncHistoryEntry[]>("get_sync_history");
+export const clearSyncHistory = () => invoke<void>("clear_sync_history");
 export const getLocalPerformance = () =>
   invoke<{ cpu_percent: number; memory_percent: number; memory_used_gb: number; memory_total_gb: number; disk_percent: number; disk_free_gb: number; disk_total_gb: number; uptime_days: number }>("get_local_performance");
 export const generateSelfSigned = (commonName: string, days: number) =>
