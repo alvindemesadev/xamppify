@@ -1,11 +1,11 @@
 {
-    "version":  "0.4.1",
-    "notes":  "Responsive layout across all pages -- fluid inputs, flex-wrap button bars, adaptive grids, column sizing, truncation",
-    "pub_date":  "2026-08-04T16:15:34.1223857Z",
+    "version":  "0.5.0",
+    "notes":  "15 new features: framework-aware deployments, Apache/MySQL port auto-detect, virtual hosts, .env editor, composer/npm tooling, per-deployment SSL, tags/pin/sort, git import, duplicate, deployment log filter, backup restore, custom domains. Search feature removed.",
+    "pub_date":  "2026-08-04T17:07:52.2880819Z",
     "platforms":  {
                       "windows-x86_64":  {
-                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTRk1HbmVkeXlNdk5zLzB5ekxWNXVHekw4b2VUeVJRaEtQVE9ZY0V2TURiSzZXd0xUQm1vaHQ3Yzg5OWFQYTcwaUZJa3dUYW9QOUptVm5VanBnekd2RU4xNmNHYzdGT2c0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1ODYwMTI2CWZpbGU6WGFtcHBpZnlfMC40LjFfeDY0LXNldHVwLmV4ZQo1UEhnV1BJNEdxbEV0QzlIbVM5OEZBblFuZWNnb3BoS25kbHJNYmEwaHRFR0NoNEtYMlZWU045cXVxM3NXZGJzSGFBSzBiUHdpL09aWG00aHQzTVZDUT09Cg==",
-                                             "url":  "https://github.com/alvindemesadev/xamppify/releases/download/v0.4.1/Xamppify_0.4.1_x64-setup.exe"
+                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTRk1HbmVkeXlNdkZ1UDIzcCsvUmRXRHpqRlRIWXo2NnY0Y2xFU2dIbnV2dDJ0MVM5bUpoWXg4ZmNRRFJmd1lLQlNZVHBGZTA1MmZlM0V3Wk5DbUdKdVZyNVA2RitXdndVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1ODYzMjYzCWZpbGU6WGFtcHBpZnlfMC41LjBfeDY0LXNldHVwLmV4ZQpxRkdEaEpzV2tHYWN5R3ZBeUxNY3RFRmhaYWtibS83S3hEMm9TR0tmWkgzVE1RSytGQjZiS1czT2gxeUQ2WDgzb0FJRWNkbVRUem4yQXJ4aDdiaFVEUT09Cg==",
+                                             "url":  "https://github.com/alvindemesadev/xamppify/releases/download/v0.5.0/Xamppify_0.5.0_x64-setup.exe"
                                          }
                   }
 }
