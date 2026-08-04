@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 src-tauri/.tauri/
-latest.json
+# Auto-generated update manifest - committed to repo for stable updater URL

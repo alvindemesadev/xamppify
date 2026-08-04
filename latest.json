@@ -1,0 +1,11 @@
+﻿{
+    "version":  "0.3.0",
+    "notes":  "Auto-update support - Xamppify now updates itself from GitHub Releases",
+    "pub_date":  "2026-08-04T08:22:36.0508597Z",
+    "platforms":  {
+                      "windows-x86_64":  {
+                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTRk1HbmVkeXlNdkp6MDl5VEJFeFdlUHBaZ0xwV0ovejltL2tuNXNleHZaRUh4cVlyWTZvUmtGSVJNLy8vTERBcjZ3ZWx5WEhFM0lGVGZTY20xSHBpQVlDUnFuOS9LZ2dzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1ODMxNzQ5CWZpbGU6WGFtcHBpZnlfMC4zLjBfeDY0LXNldHVwLmV4ZQpYR2FYQkhBbFI2TWRBSlNhaC9NUkRhQXh2d3p3NGE4dVBiWEpCRVFBN0t5WkhMQlVkU3FBci90eEt1UDVpS0owKzdacVBDeTBFTnNvYUdPRmRETFdEZz09Cg==",
+                                             "url":  "https://github.com/alvindemesadev/xamppify/releases/download/v0.3.0/Xamppify_0.3.0_x64-setup.exe"
+                                         }
+                  }
+}
