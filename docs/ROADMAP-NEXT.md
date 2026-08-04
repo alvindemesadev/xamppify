@@ -149,13 +149,116 @@ when the port is not 80:
 
 ---
 
+## 9. MySQL port auto-detect
+
+The port work in section 2 is Apache-only. MySQL has the same problem — the Database Manager
+defaults to 3306, but XAMPP can run MySQL on 3307 or another port.
+
+### 9a. Detect MySQL port from my.ini
+- Read the `port` / `bind-address` directives from `mysql\bin\my.ini`
+- Pre-fill the Database Manager connection dialog with the detected port
+- Fall back to 3306 if not found
+
+### 9b. Reflect MySQL port everywhere
+- Show the detected MySQL port in the Dashboard service strip and MachineCards
+- Use it as the default in `mysqlConnect` when the user leaves the port empty
+
+---
+
+## 10. Per-deployment database provisioning
+
+Ties framework selection (section 1) to a real workflow: when you create a Laravel/PHP project,
+you almost always need a matching MySQL database.
+
+### 10a. Create database on deployment
+- In the "New deployment" dialog, offer "Create a matching MySQL database"
+- Auto-names it after the deployment (e.g., `hris_db`)
+- Sets `.env` / config file `DB_DATABASE` accordingly (framework-aware)
+
+### 10b. Database management from the deployment card
+- "Open database" action on cards → jumps to Database Manager connected to that database
+- Show linked database name on the deployment card
+
+---
+
+## 11. Git import
+
+### 11a. Clone a repository as a deployment
+- Import dialog gets a "From Git" tab — paste a repo URL
+- Backend runs `git clone` into `htdocs`, then applies the framework auto-detect (1c)
+- Support private repos with a saved Git credential (Windows Credential Manager, like MySQL)
+
+### 11b. Per-deployment Git panel
+- Show branch, dirty status, last commit on the deployment card or a detail pane
+- Quick actions: pull, status, open a Git GUI
+
+---
+
+## 12. Duplicate deployment
+
+### 12a. Copy an existing deployment
+- Card action → "Duplicate" — copies the folder to `{name}-copy` and creates a fresh DB name
+- Useful for staging copies before risky changes
+
+### 12b. Template deployments
+- Save any deployment as a reusable template for the "New deployment" dialog
+
+---
+
+## 13. Per-deployment log filtering
+
+### 13a. Filter Apache logs by deployment
+- In the Log Viewer, add a deployment dropdown
+- Filters access/error log lines to requests hitting that deployment's path
+- Ties into framework awareness — Laravel projects have predictable URL patterns
+
+### 13b. Deployment error badge
+- If the last N lines of the Apache error log reference a deployment, show a small alert badge on its card
+
+---
+
+## 14. Backup restore
+
+Complements the existing zip backup feature (roadmap item 15, done in v0.4.0).
+
+### 14a. Restore from a backup
+- Deployment card action → "Restore backup" — lists `deployment-backups\*.zip`
+- Previews contents, restores to a new deployment name (never overwrites an existing folder)
+
+### 14b. Auto-backup scheduling
+- Optional per-deployment daily/weekly auto-backup
+- Retain last N backups, prune older ones
+
+---
+
+## 15. Custom URL / domain per deployment
+
+Ties into virtual hosts (section 3) but lighter-weight.
+
+### 15a. Custom domain without editing config
+- Deployment settings → set a custom `ServerName` like `myapp.test`
+- App offers to update `httpd-vhosts.conf` + the Windows `hosts` file
+- Card shows the friendly URL alongside the localhost URL
+
+### 15b. URL alias
+- Add multiple URLs (localhost + LAN IP + custom domain) per deployment
+- All update automatically when the Apache port changes (section 2)
+
+---
+
 ## Priority order
 
 1. **Auto-detect Apache port everywhere** (2a, 2b) — bugfix, fast win
-2. **Framework selection on create/import** (1a, 1b) — core UX improvement
-3. **Auto-detect existing framework on import** (1c)
-4. **Virtual host auto-generation** (3a, 3b)
-5. **Deployment labels and organization** (7a, 7b)
-6. **Composer/NPM integration** (5a)
-7. **SSL per deployment** (6a, 6b)
-8. **Everything else**
+2. **Auto-detect MySQL port** (9a, 9b) — same pattern, quick win
+3. **Framework selection on create/import** (1a, 1b) — core UX improvement
+4. **Auto-detect existing framework on import** (1c)
+5. **Per-deployment database provisioning** (10a, 10b) — pairs naturally with #1
+6. **Git import** (11a, 11b)
+7. **Virtual host auto-generation** (3a, 3b)
+8. **Deployment labels and organization** (7a, 7b)
+9. **Duplicate deployment** (12a, 12b)
+10. **Composer/NPM integration** (5a)
+11. **Per-deployment log filtering** (13a, 13b)
+12. **Backup restore** (14a, 14b)
+13. **SSL per deployment** (6a, 6b)
+14. **Everything else**
