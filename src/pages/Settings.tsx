@@ -1,8 +1,19 @@
 import { Sun, Moon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getVersion } from "@tauri-apps/api/app";
 import { useUiStore } from "@/stores/ui-store";
+import { useUpdaterStore } from "@/stores/updater-store";
 
 export default function Settings() {
   const { theme, setTheme, compactMode, toggleCompactMode, resetOnboarding } = useUiStore();
+  const { checking, installing, lastResult, error, checkNow } = useUpdaterStore();
+  const [version, setVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    getVersion()
+      .then(setVersion)
+      .catch(() => setVersion(null));
+  }, []);
 
   return (
     <div className="p-6">
@@ -43,6 +54,27 @@ export default function Settings() {
           <h2 className="font-medium">Setup checks</h2>
           <p className="mt-2 text-muted-foreground">Review XAMPP, OpenSSL, log, and htdocs availability again.</p>
           <button onClick={resetOnboarding} className="mt-3 h-8 rounded bg-secondary px-3 text-sm text-secondary-foreground">Run setup checks</button>
+        </section>
+        <section className="rounded-lg border border-border p-4 text-sm">
+          <h2 className="font-medium">Updates</h2>
+          <p className="mt-2 text-muted-foreground">
+            Version {version ?? "…"} — updates are downloaded from GitHub Releases and installed automatically.
+          </p>
+          <div className="mt-3 flex items-center gap-3">
+            <button
+              onClick={() => checkNow({ notify: true })}
+              disabled={checking || installing}
+              className="h-8 rounded bg-secondary px-3 text-sm text-secondary-foreground disabled:opacity-50"
+            >
+              {checking ? "Checking…" : "Check for updates"}
+            </button>
+            {lastResult === "none" && !checking && (
+              <span className="text-xs text-muted-foreground">You're up to date</span>
+            )}
+            {lastResult === "error" && !checking && error && (
+              <span className="text-xs text-red-600 dark:text-red-400">Check failed</span>
+            )}
+          </div>
         </section>
       </div>
     </div>

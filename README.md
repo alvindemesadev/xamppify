@@ -143,6 +143,40 @@ Windows artifacts are written to:
 - `src-tauri\target\release\bundle\nsis\`
 - `src-tauri\target\release\bundle\msi\`
 
+### Release an update
+
+Automatic updates are served from a static `latest.json` attached to each [GitHub Release](https://github.com/alvindemesadev/xamppify/releases).
+
+1. Set the signing environment variables (required — the updater cannot be disabled):
+
+   ```powershell
+   $env:TAURI_SIGNING_PRIVATE_KEY = Get-Content "src-tauri\.tauri\xamppify.key" -Raw
+   $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = "<your key password>"
+   ```
+
+   The private key lives in `src-tauri\.tauri\` (gitignored). Back it up; losing it means existing installs can never update again.
+
+2. Build the signed artifacts:
+
+   ```powershell
+   pnpm tauri build
+   ```
+
+   This produces `Xamppify_<version>_x64-setup.exe` and `.exe.sig` in `src-tauri\target\release\bundle\nsis\`.
+
+3. Generate the update manifest:
+
+   ```powershell
+   powershell -File scripts\create-update-manifest.ps1 -Notes "What's new in this release"
+   ```
+
+4. Create a GitHub Release with tag `v<version>` and upload **three assets**:
+   - `Xamppify_<version>_x64-setup.exe`
+   - `Xamppify_<version>_x64-setup.exe.sig`
+   - `latest.json`
+
+Installed apps check for updates 10 seconds after launch and on demand from **Settings → Updates**.
+
 ## Architecture
 
 | Area | Technology | Responsibility |

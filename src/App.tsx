@@ -1,7 +1,10 @@
 import { HashRouter, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
+import { UpdateDialog } from "@/components/updater/UpdateDialog";
+import { useUpdaterStore } from "@/stores/updater-store";
 import Dashboard from "@/pages/Dashboard";
 import ConfigEditor from "@/pages/ConfigEditor";
 import DatabaseManager from "@/pages/DatabaseManager";
@@ -25,6 +28,13 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      useUpdaterStore.getState().checkNow();
+    }, 10_000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <HashRouter>
@@ -42,6 +52,7 @@ function App() {
           </Routes>
         </AppShell>
         <CommandPalette />
+        <UpdateDialog />
       </HashRouter>
       <Toaster position="bottom-right" />
       <Onboarding />
