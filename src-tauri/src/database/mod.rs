@@ -29,7 +29,7 @@ pub async fn connect(
     port: Option<u16>,
     user: String,
     password: String,
-) -> Result<(), String> {
+) -> Result<(), crate::error::AppError> {
     let host = host.unwrap_or_else(|| LOCAL_MYSQL.to_string());
     let port = port.unwrap_or(MYSQL_PORT);
 
@@ -55,7 +55,7 @@ pub async fn disconnect() {
     }
 }
 
-pub async fn list_databases() -> Result<Vec<String>, String> {
+pub async fn list_databases() -> Result<Vec<String>, crate::error::AppError> {
     let mut guard = pool().lock().await;
     let p = guard
         .as_mut()
@@ -74,7 +74,7 @@ pub async fn list_databases() -> Result<Vec<String>, String> {
     Ok(rows)
 }
 
-pub async fn list_tables(database: &str) -> Result<Vec<String>, String> {
+pub async fn list_tables(database: &str) -> Result<Vec<String>, crate::error::AppError> {
     let mut guard = pool().lock().await;
     let p = guard
         .as_mut()
@@ -99,7 +99,7 @@ pub struct QueryResult {
     pub affected_rows: u64,
 }
 
-pub async fn run_query(query: &str) -> Result<QueryResult, String> {
+pub async fn run_query(query: &str) -> Result<QueryResult, crate::error::AppError> {
     let mut guard = pool().lock().await;
     let p = guard
         .as_mut()
@@ -165,7 +165,7 @@ pub async fn run_query(query: &str) -> Result<QueryResult, String> {
     }
 }
 
-pub async fn export_database(database: &str) -> Result<String, String> {
+pub async fn export_database(database: &str) -> Result<String, crate::error::AppError> {
     let mut output = String::new();
     output.push_str(&format!("-- Export of database: {}\n\n", database));
 

@@ -137,12 +137,10 @@ pub async fn delete_path(path: &str) -> Result<(), String> {
     if canonical == root {
         return Err("The XAMPP root cannot be deleted".to_string());
     }
-    if metadata.is_dir() {
-        fs::remove_dir_all(canonical).await
-    } else {
-        fs::remove_file(canonical).await
-    }
-    .map_err(|e| format!("Failed to delete item: {e}"))
+    let canonical_for_recycle = canonical.clone();
+    tokio::task::spawn_blocking(move || crate::recycle::recycle_path(&canonical_for_recycle))
+        .await
+        .map_err(|e| format!("Delete task failed: {e}"))?
 }
 
 pub async fn rename_path(path: &str, new_name: &str) -> Result<String, String> {
@@ -299,4 +297,85 @@ fn copy_upload_tree(source: &Path, destination: &Path) -> Result<(), String> {
         let _ = std::fs::remove_dir_all(destination);
     }
     result
+}
+
+/// Uploads a mixed list of dropped files and folders (from drag-and-drop) into
+/// a destination folder, routing each item to the correct copy path.
+pub async fn upload_paths(destination: &str, source_paths: Vec<String>) -> Result<(), String> {
+    if source_paths.is_empty() {
+        return Err("No files were dropped".to_string());
+    }
+    let destination = existing_directory(destination)?;
+    let mut files = Vec::new();
+    let mut folders = Vec::new();
+    for source in &source_paths {
+        let metadata = fs::symlink_metadata(source)
+            .await
+            .map_err(|e| format!("Failed to inspect dropped item: {e}"))?;
+        if metadata.file_type().is_symlink() {
+            return Err("Symbolic links cannot be uploaded".to_string());
+        }
+        if metadata.is_dir() {
+            folders.push(source.clone());
+        } else if metadata.is_file() {
+            files.push(source.clone());
+        } else {
+            return Err(format!("Unsupported dropped item: {source}"));
+        }
+    }
+    if !files.is_empty() {
+        let destination = destination.to_string_lossy().to_string();
+        upload_files(&destination, files).await?;
+    }
+    for folder in folders {
+        let destination = destination.to_string_lossy().to_string();
+        upload_folder(&destination, &folder).await?;
+    }
+    Ok(())
+}
+
+#[derive(serde::Serialize, Clone, Debug)]
+pub struct ImageData {
+    pub mime: String,
+    pub data: String,
+}
+
+/// Reads an image file inside XAMPP and returns its MIME type plus base64
+/// payload so the frontend can render a preview without extra plugins.
+pub async fn read_image(path: &str) -> Result<ImageData, String> {
+    use base64::Engine;
+
+    const MAX_IMAGE_BYTES: u64 = 15 * 1024 * 1024;
+
+    let canonical = crate::paths::ensure_existing_path_in_xampp(Path::new(path))?;
+    if canonical.is_dir() {
+        return Err("Cannot read a directory as an image".to_string());
+    }
+    let extension = canonical
+        .extension()
+        .and_then(|extension| extension.to_str())
+        .map(|extension| extension.to_ascii_lowercase());
+    let mime = match extension.as_deref() {
+        Some("png") => "image/png",
+        Some("jpg") | Some("jpeg") => "image/jpeg",
+        Some("gif") => "image/gif",
+        Some("webp") => "image/webp",
+        Some("bmp") => "image/bmp",
+        Some("svg") => "image/svg+xml",
+        Some("ico") => "image/x-icon",
+        _ => return Err("This file type cannot be previewed as an image".to_string()),
+    };
+    let metadata = fs::metadata(&canonical)
+        .await
+        .map_err(|e| format!("Failed to inspect image: {e}"))?;
+    if metadata.len() > MAX_IMAGE_BYTES {
+        return Err("This image is too large to preview (maximum 15 MB)".to_string());
+    }
+    let bytes = fs::read(&canonical)
+        .await
+        .map_err(|e| format!("Failed to read image: {e}"))?;
+    Ok(ImageData {
+        mime: mime.to_string(),
+        data: base64::engine::general_purpose::STANDARD.encode(bytes),
+    })
 }

@@ -115,6 +115,17 @@ fn get_subnet(ip: std::net::IpAddr) -> Option<[u8; 3]> {
     }
 }
 
+async fn check_port(ip: Ipv4Addr, port: u16) -> bool {
+    let addr = SocketAddrV4::new(ip, port);
+    tokio::time::timeout(Duration::from_millis(500), TcpStream::connect(addr))
+        .await
+        .is_ok_and(|r| r.is_ok())
+}
+
+async fn is_apache_http(ip: Ipv4Addr) -> bool {
+    crate::discovery::http_check::is_apache_server(&format!("http://{}/", ip), 2).await
+}
+
 #[cfg(test)]
 mod tests {
     use super::get_subnet;
@@ -132,15 +143,4 @@ mod tests {
     fn does_not_scan_loopback_when_only_ipv6_is_available() {
         assert_eq!(get_subnet(IpAddr::V6(Ipv6Addr::LOCALHOST)), None);
     }
-}
-
-async fn check_port(ip: Ipv4Addr, port: u16) -> bool {
-    let addr = SocketAddrV4::new(ip, port);
-    tokio::time::timeout(Duration::from_millis(500), TcpStream::connect(addr))
-        .await
-        .is_ok_and(|r| r.is_ok())
-}
-
-async fn is_apache_http(ip: Ipv4Addr) -> bool {
-    crate::discovery::http_check::is_apache_server(&format!("http://{}/", ip), 2).await
 }

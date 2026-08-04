@@ -39,3 +39,11 @@ pub async fn upload_files(destination: String, source_paths: Vec<String>) -> Res
 pub async fn upload_folder(destination: String, source_path: String) -> Result<(), String> {
     crate::file_browser::upload_folder(&destination, &source_path).await
 }
+#[tauri::command]
+pub async fn upload_paths(destination: String, source_paths: Vec<String>) -> Result<(), String> {
+    crate::file_browser::upload_paths(&destination, source_paths).await
+}
+#[tauri::command]
+pub async fn read_image(path: String) -> Result<crate::file_browser::ImageData, String> {
+    crate::file_browser::read_image(&path).await
+}

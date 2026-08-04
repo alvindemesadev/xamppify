@@ -141,10 +141,10 @@ pub async fn sync_to_remote(
     remote_host: &str,
     username: Option<&str>,
     password: Option<&str>,
-) -> Result<SyncResult, String> {
+) -> Result<SyncResult, crate::error::AppError> {
     let source_path = Path::new(source);
     if !source_path.exists() {
-        return Err(format!("Source path does not exist: {}", source));
+        return Err(format!("Source path does not exist: {}", source).into());
     }
 
     let dest_unc = build_unc_path(remote_host, destination);
@@ -317,5 +317,50 @@ pub async fn test_remote_connection(
         unc_path,
         message,
         suggestions,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::build_unc_path;
+
+    #[test]
+    fn passes_through_full_unc_paths() {
+        assert_eq!(
+            build_unc_path("pc-01", r"\\pc-01\C$\www"),
+            r"\\pc-01\C$\www"
+        );
+    }
+
+    #[test]
+    fn converts_drive_paths_to_admin_shares() {
+        assert_eq!(
+            build_unc_path("192.168.1.5", r"C:\www\site"),
+            r"\\192.168.1.5\C$\www\site"
+        );
+    }
+
+    #[test]
+    fn normalizes_forward_slashes_in_drive_paths() {
+        assert_eq!(
+            build_unc_path("pc-01", "C:/www/site"),
+            r"\\pc-01\C$\www\site"
+        );
+    }
+
+    #[test]
+    fn treats_plain_paths_as_share_relative() {
+        assert_eq!(
+            build_unc_path("pc-01", "shared/folder"),
+            r"\\pc-01\shared\folder"
+        );
+    }
+
+    #[test]
+    fn trims_surrounding_whitespace() {
+        assert_eq!(
+            build_unc_path("  pc-01  ", "  C:\\www  "),
+            r"\\pc-01\C$\www"
+        );
     }
 }

@@ -9,7 +9,7 @@ pub async fn sync_to_remote(
     remote_host: String,
     username: Option<String>,
     password: Option<String>,
-) -> Result<crate::file_sync::SyncResult, String> {
+) -> Result<crate::file_sync::SyncResult, crate::error::AppError> {
     let result = crate::file_sync::sync_to_remote(
         &source,
         &destination,
@@ -45,7 +45,7 @@ pub async fn test_remote_connection(
     destination: String,
     username: Option<String>,
     password: Option<String>,
-) -> Result<crate::file_sync::ConnectionTestResult, String> {
+) -> Result<crate::file_sync::ConnectionTestResult, crate::error::AppError> {
     Ok(crate::file_sync::test_remote_connection(
         &remote_host,
         &destination,
@@ -56,13 +56,50 @@ pub async fn test_remote_connection(
 }
 
 #[tauri::command]
-pub fn get_sync_history(app: tauri::AppHandle) -> Result<Vec<SyncHistoryEntry>, String> {
+pub fn get_sync_history(app: tauri::AppHandle) -> Result<Vec<SyncHistoryEntry>, crate::error::AppError> {
     let app_data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
-    history::load(app_data_dir)
+    history::load(app_data_dir).map_err(Into::into)
 }
 
 #[tauri::command]
-pub fn clear_sync_history(app: tauri::AppHandle) -> Result<(), String> {
+pub fn clear_sync_history(app: tauri::AppHandle) -> Result<(), crate::error::AppError> {
     let app_data_dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
-    history::clear(app_data_dir)
+    history::clear(app_data_dir).map_err(Into::into)
+}
+
+#[tauri::command]
+#[allow(clippy::too_many_arguments)]
+pub async fn set_scheduled_sync(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, crate::AppState>,
+    source: String,
+    destination: String,
+    remote_host: String,
+    username: Option<String>,
+    password: Option<String>,
+    interval_minutes: u64,
+) -> Result<(), String> {
+    let config = crate::sync_scheduler::SyncScheduleConfig {
+        source,
+        destination,
+        remote_host,
+        username,
+        password,
+        interval_minutes,
+    };
+    state.scheduler.start(app, config)
+}
+
+#[tauri::command]
+pub fn stop_scheduled_sync(
+    state: tauri::State<'_, crate::AppState>,
+) -> Result<(), String> {
+    state.scheduler.stop()
+}
+
+#[tauri::command]
+pub fn get_scheduled_sync(
+    state: tauri::State<'_, crate::AppState>,
+) -> Option<crate::sync_scheduler::SyncScheduleStatus> {
+    state.scheduler.status()
 }

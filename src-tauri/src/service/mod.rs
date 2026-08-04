@@ -100,7 +100,7 @@ fn parse_sc_query(
         .and_then(|s| s.trim().parse::<u32>().ok());
 
     let port = match service_type {
-        crate::ServiceType::Apache => 80,
+        crate::ServiceType::Apache => crate::paths::apache_port(),
         crate::ServiceType::MySQL => 3306,
         crate::ServiceType::FileZilla => 21,
     };

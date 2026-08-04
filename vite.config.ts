@@ -14,6 +14,29 @@ export default defineConfig(async () => ({
   },
 
   clearScreen: false,
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("@tanstack") || id.includes("react-query")) {
+              return "react-query";
+            }
+            if (id.includes("react-router")) {
+              return "router";
+            }
+            if (id.includes("recharts")) {
+              return "charts";
+            }
+            if (id.includes("sql-formatter") || id.includes("sql.js") || id.includes("@lexical") || id.includes("monaco") || id.includes("codemirror")) {
+              return "editors";
+            }
+            return "vendor";
+          }
+        },
+      },
+    },
+  },
   server: {
     port: 1420,
     strictPort: true,

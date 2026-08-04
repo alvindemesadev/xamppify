@@ -1,21 +1,58 @@
 mod commands;
 mod config_editor;
+mod credentials;
 mod database;
 mod deployment;
 mod discovery;
+mod error;
 mod file_browser;
 mod file_sync;
 mod log;
 mod paths;
 mod performance;
+mod recycle;
+mod search;
 mod service;
 mod ssl_manager;
+mod sync_scheduler;
 
 use discovery::MachineRegistry;
 use serde::{Deserialize, Serialize};
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
 use tauri::Manager;
+
+fn init_tracing(app_data_dir: Option<std::path::PathBuf>) {
+    use tracing_subscriber::prelude::*;
+
+    let env_filter = tracing_subscriber::EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
+
+    let registry = tracing_subscriber::registry()
+        .with(env_filter)
+        .with(tracing_subscriber::fmt::layer().with_target(false));
+
+    let Some(log_dir) = app_data_dir.map(|dir| dir.join("logs")) else {
+        registry.init();
+        return;
+    };
+    if std::fs::create_dir_all(&log_dir).is_err() {
+        registry.init();
+        return;
+    }
+    let appender = tracing_appender::rolling::Builder::new()
+        .rotation(tracing_appender::rolling::Rotation::DAILY)
+        .filename_prefix("xamppify")
+        .filename_suffix("log")
+        .build(log_dir);
+    let Ok(appender) = appender else {
+        registry.init();
+        return;
+    };
+    let (writer, guard) = tracing_appender::non_blocking(appender);
+    Box::leak(Box::new(guard));
+    registry.with(tracing_subscriber::fmt::layer().with_writer(writer)).init();
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum DiscoveryMethod {
@@ -97,17 +134,11 @@ pub struct AppState {
     pub registry: Arc<MachineRegistry>,
     pub heartbeat_tracker: Arc<discovery::heartbeat::HeartbeatTracker>,
     pub discovery_running: Arc<AtomicBool>,
+    pub scheduler: Arc<sync_scheduler::Scheduler>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info")),
-        )
-        .init();
-
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
@@ -117,8 +148,11 @@ pub fn run() {
             registry: MachineRegistry::new_shared(),
             heartbeat_tracker: discovery::heartbeat::HeartbeatTracker::new_shared(),
             discovery_running: Arc::new(AtomicBool::new(false)),
+            scheduler: Arc::new(sync_scheduler::Scheduler::new()),
         })
         .setup(|app| {
+            init_tracing(app.path().app_data_dir().ok());
+
             #[cfg(desktop)]
             app.handle()
                 .plugin(tauri_plugin_updater::Builder::new().build())?;
@@ -188,10 +222,17 @@ pub fn run() {
             commands::file_commands::rename_path,
             commands::file_commands::upload_files,
             commands::file_commands::upload_folder,
+            commands::file_commands::upload_paths,
+            commands::file_commands::read_image,
             commands::database_commands::mysql_connect,
             commands::database_commands::mysql_disconnect,
+            commands::credentials_commands::save_mysql_credentials,
+            commands::credentials_commands::get_mysql_credentials,
+            commands::credentials_commands::delete_mysql_credentials,
             commands::config_commands::get_known_configs,
             commands::config_commands::parse_ini_sections,
+            commands::config_commands::test_apache_config,
+            commands::config_commands::save_config_file,
             commands::database_commands::list_databases,
             commands::database_commands::list_tables,
             commands::database_commands::run_query,
@@ -200,6 +241,7 @@ pub fn run() {
             commands::deployment_commands::create_deployment,
             commands::deployment_commands::import_deployment,
             commands::deployment_commands::delete_deployment,
+            commands::deployment_commands::backup_deployment,
             commands::ssl_commands::list_certificates,
             commands::ssl_commands::read_certificate,
             commands::ssl_commands::generate_self_signed,
@@ -207,7 +249,11 @@ pub fn run() {
             commands::file_sync_commands::test_remote_connection,
             commands::file_sync_commands::get_sync_history,
             commands::file_sync_commands::clear_sync_history,
+            commands::file_sync_commands::set_scheduled_sync,
+            commands::file_sync_commands::stop_scheduled_sync,
+            commands::file_sync_commands::get_scheduled_sync,
             commands::performance_commands::get_local_performance,
+            commands::search_commands::search_htdocs,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

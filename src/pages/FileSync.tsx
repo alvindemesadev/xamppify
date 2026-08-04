@@ -12,12 +12,15 @@ import {
   ChevronDown,
   ChevronUp,
   Trash2,
+  TimerReset,
+  TimerOff,
 } from "lucide-react";
 import { toast } from "sonner";
+import { listen } from "@tauri-apps/api/event";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { syncToRemote, testRemoteConnection, getSyncHistory, clearSyncHistory } from "@/lib/ipc";
+import { syncToRemote, testRemoteConnection, getSyncHistory, clearSyncHistory, getScheduledSync, setScheduledSync, stopScheduledSync } from "@/lib/ipc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type SyncLogItem = {
@@ -46,6 +49,36 @@ export default function FileSyncPage() {
   const [testResult, setTestResult] = useState<TestConnectionResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [intervalMinutes, setIntervalMinutes] = useState(30);
+  const [schedule, setSchedule] = useState<{
+    source: string;
+    destination: string;
+    remote_host: string;
+    interval_minutes: number;
+    last_run: string | null;
+    next_run: string | null;
+  } | null>(null);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    (async () => {
+      unlisten = await listen<{ success: boolean; files_copied: number; message: string; timestamp: string }>(
+        "scheduled-sync-result",
+        (event) => {
+          const { success, files_copied, message, timestamp } = event.payload;
+          setLogs((prev) => [...prev, { result: success ? "success" : "error", message: success ? `${message} (${files_copied} items)` : message, timestamp }]);
+          if (success) toast.success(`Scheduled sync completed (${files_copied} items)`);
+          else toast.error("Scheduled sync reported errors", { description: message });
+          getScheduledSync().then(setSchedule).catch(() => {});
+        }
+      );
+    })();
+    return () => { unlisten?.(); };
+  }, []);
+
+  useEffect(() => {
+    getScheduledSync().then(setSchedule).catch(() => {});
+  }, []);
 
   const refreshHistory = () =>
     getSyncHistory()
@@ -105,6 +138,24 @@ export default function FileSyncPage() {
       toast.error(msg);
       setLogs((prev) => [...prev, { result: "error", message: msg }]);
     },
+  });
+
+  const scheduleMutation = useMutation({
+    mutationFn: () => setScheduledSync(source, dest, remoteHost, intervalMinutes, username, password),
+    onSuccess: () => {
+      toast.success(`Scheduled sync started — every ${intervalMinutes} minutes`);
+      getScheduledSync().then(setSchedule).catch(() => {});
+    },
+    onError: (e: unknown) => toast.error(`Failed to schedule sync: ${String(e)}`),
+  });
+
+  const stopScheduleMutation = useMutation({
+    mutationFn: stopScheduledSync,
+    onSuccess: () => {
+      setSchedule(null);
+      toast.success("Scheduled sync stopped");
+    },
+    onError: (e: unknown) => toast.error(`Failed to stop scheduled sync: ${String(e)}`),
   });
 
   const handleCopyRegistryCommand = () => {
@@ -222,6 +273,72 @@ export default function FileSyncPage() {
                   {syncMutation.isPending ? "Syncing…" : "Sync now"}
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Scheduled sync</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-4">
+              <label className="grid gap-1.5 text-sm">
+                <span className="text-muted-foreground font-medium">Sync every</span>
+                <select
+                  value={intervalMinutes}
+                  onChange={(e) => setIntervalMinutes(Number(e.target.value))}
+                  disabled={!!schedule || scheduleMutation.isPending}
+                  className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+                  aria-label="Sync interval"
+                >
+                  <option value={15}>15 minutes</option>
+                  <option value={30}>30 minutes</option>
+                  <option value={60}>1 hour</option>
+                  <option value={120}>2 hours</option>
+                  <option value={360}>6 hours</option>
+                  <option value={1440}>24 hours</option>
+                </select>
+              </label>
+
+              {schedule ? (
+                <div className="grid gap-2 rounded-lg border bg-muted/40 p-3 text-xs">
+                  <p className="flex items-center gap-2 font-medium text-emerald-600 dark:text-emerald-400">
+                    <TimerReset className="size-4" /> Running every {schedule.interval_minutes} minutes
+                  </p>
+                  <p className="font-mono text-muted-foreground">
+                    {schedule.source} → {schedule.remote_host}
+                  </p>
+                  {schedule.last_run && (
+                    <p className="text-muted-foreground">Last run: {schedule.last_run}</p>
+                  )}
+                  {schedule.next_run && (
+                    <p className="text-muted-foreground">Next run: {schedule.next_run}</p>
+                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => stopScheduleMutation.mutate()}
+                    disabled={stopScheduleMutation.isPending}
+                    className="mt-1 w-fit"
+                  >
+                    <TimerOff className="size-4 mr-1.5" />
+                    {stopScheduleMutation.isPending ? "Stopping…" : "Stop schedule"}
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Runs the configured sync automatically on an interval. The schedule keeps running
+                  while this window is open, even if you navigate away.
+                </p>
+              )}
+
+              <Button
+                variant="outline"
+                onClick={() => scheduleMutation.mutate()}
+                disabled={scheduleMutation.isPending || !!schedule || !source || !remoteHost || !dest}
+              >
+                <TimerReset className="size-4 mr-1.5" />
+                {scheduleMutation.isPending ? "Scheduling…" : schedule ? "Schedule active" : "Start scheduled sync"}
+              </Button>
             </CardContent>
           </Card>
 

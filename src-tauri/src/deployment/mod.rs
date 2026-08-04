@@ -34,15 +34,15 @@ fn validate_name(name: &str) -> Result<&str, String> {
     Ok(name)
 }
 
-async fn ensure_deployment_root() -> Result<PathBuf, String> {
+async fn ensure_deployment_root() -> Result<PathBuf, crate::error::AppError> {
     let root = deployment_root();
     fs::create_dir_all(&root)
         .await
         .map_err(|e| format!("Failed to create htdocs directory: {e}"))?;
-    crate::paths::ensure_existing_path_in_xampp(&root)
+    crate::paths::ensure_existing_path_in_xampp(&root).map_err(|e| e.into())
 }
 
-fn deployment_from_path(path: &Path) -> Result<Deployment, String> {
+fn deployment_from_path(path: &Path) -> Result<Deployment, crate::error::AppError> {
     let metadata =
         std::fs::metadata(path).map_err(|e| format!("Failed to read deployment metadata: {e}"))?;
     let modified = metadata
@@ -69,7 +69,7 @@ fn deployment_from_path(path: &Path) -> Result<Deployment, String> {
     })
 }
 
-pub async fn list_deployments() -> Result<Vec<Deployment>, String> {
+pub async fn list_deployments() -> Result<Vec<Deployment>, crate::error::AppError> {
     let root = ensure_deployment_root().await?;
     let mut entries = fs::read_dir(root)
         .await
@@ -93,15 +93,15 @@ pub async fn list_deployments() -> Result<Vec<Deployment>, String> {
     Ok(deployments)
 }
 
-pub async fn create_deployment(name: String, template: String) -> Result<Deployment, String> {
+pub async fn create_deployment(name: String, template: String) -> Result<Deployment, crate::error::AppError> {
     let name = validate_name(&name)?;
     if !matches!(template.as_str(), "html" | "php") {
-        return Err("Choose either the HTML or PHP starter template".to_string());
+        return Err("Choose either the HTML or PHP starter template".to_string().into());
     }
     let root = ensure_deployment_root().await?;
     let path = root.join(name);
     if path.exists() {
-        return Err(format!("A deployment named '{name}' already exists"));
+        return Err(format!("A deployment named '{name}' already exists").into());
     }
     fs::create_dir(&path)
         .await
@@ -128,7 +128,7 @@ pub async fn create_deployment(name: String, template: String) -> Result<Deploym
     .await;
     if let Err(error) = write_result {
         let _ = fs::remove_dir(&path).await;
-        return Err(format!("Failed to create starter project: {error}"));
+        return Err(format!("Failed to create starter project: {error}").into());
     }
     deployment_from_path(&path)
 }
@@ -181,22 +181,22 @@ fn copy_project_tree(source: &Path, destination: &Path) -> Result<(), String> {
     copy_directory(source, destination, &mut files, &mut bytes)
 }
 
-pub async fn import_deployment(name: String, source_path: String) -> Result<Deployment, String> {
+pub async fn import_deployment(name: String, source_path: String) -> Result<Deployment, crate::error::AppError> {
     let name = validate_name(&name)?.to_string();
     let root = ensure_deployment_root().await?;
     let target = root.join(&name);
     if target.exists() {
-        return Err(format!("A deployment named '{name}' already exists"));
+        return Err(format!("A deployment named '{name}' already exists").into());
     }
     let source = std::fs::canonicalize(source_path)
         .map_err(|_| "The selected project folder is no longer available".to_string())?;
     let source_metadata = std::fs::symlink_metadata(&source)
         .map_err(|e| format!("Failed to read selected project: {e}"))?;
     if source_metadata.file_type().is_symlink() || !source_metadata.is_dir() {
-        return Err("Select a normal project folder to import".to_string());
+        return Err("Select a normal project folder to import".to_string().into());
     }
     if target.starts_with(&source) {
-        return Err("Select a project folder, not the XAMPP or htdocs parent folder".to_string());
+        return Err("Select a project folder, not the XAMPP or htdocs parent folder".to_string().into());
     }
     let source_for_copy = source.clone();
     let target_for_copy = target.clone();
@@ -206,12 +206,86 @@ pub async fn import_deployment(name: String, source_path: String) -> Result<Depl
             .map_err(|e| format!("Project import task failed: {e}"))?;
     if let Err(error) = copy_result {
         let _ = fs::remove_dir_all(&target).await;
-        return Err(error);
+        return Err(error.into());
     }
     deployment_from_path(&target)
 }
 
-pub async fn delete_deployment(name: String) -> Result<(), String> {
+fn zip_directory_tree(source: &Path, destination: &Path) -> Result<(), String> {
+    const MAX_FILES: usize = 10_000;
+    const MAX_BYTES: u64 = 500 * 1024 * 1024;
+
+    let file = std::fs::File::create(destination)
+        .map_err(|e| format!("Failed to create backup file: {e}"))?;
+    let mut writer = zip::ZipWriter::new(file);
+    let options = zip::write::SimpleFileOptions::default()
+        .compression_method(zip::CompressionMethod::Deflated);
+
+    fn walk(
+        writer: &mut zip::ZipWriter<std::fs::File>,
+        directory: &Path,
+        base: &str,
+        options: zip::write::SimpleFileOptions,
+        files: &mut usize,
+        bytes: &mut u64,
+    ) -> Result<(), String> {
+        for entry in std::fs::read_dir(directory)
+            .map_err(|e| format!("Failed to read deployment folder: {e}"))?
+        {
+            let entry =
+                entry.map_err(|e| format!("Failed to read deployment entry: {e}"))?;
+            let path = entry.path();
+            let name = entry.file_name().to_string_lossy().to_string();
+            let relative = if base.is_empty() {
+                name.clone()
+            } else {
+                format!("{base}/{name}")
+            };
+            let file_type = entry
+                .file_type()
+                .map_err(|e| format!("Failed to inspect deployment entry: {e}"))?;
+            if file_type.is_symlink() {
+                return Err("Backups cannot include symbolic links".to_string());
+            }
+            if file_type.is_dir() {
+                writer
+                    .add_directory(format!("{relative}/"), options)
+                    .map_err(|e| format!("Failed to archive folder: {e}"))?;
+                walk(writer, &path, &relative, options, files, bytes)?;
+            } else if file_type.is_file() {
+                *files += 1;
+                *bytes += entry
+                    .metadata()
+                    .map_err(|e| format!("Failed to inspect deployment file: {e}"))?
+                    .len();
+                if *files > MAX_FILES || *bytes > MAX_BYTES {
+                    return Err(
+                        "Deployment is too large to back up (maximum 10,000 files or 500 MB)"
+                            .to_string(),
+                    );
+                }
+                let mut reader = std::fs::File::open(&path)
+                    .map_err(|e| format!("Failed to open deployment file: {e}"))?;
+                writer
+                    .start_file(relative, options)
+                    .map_err(|e| format!("Failed to start archive entry: {e}"))?;
+                std::io::copy(&mut reader, writer)
+                    .map_err(|e| format!("Failed to archive deployment file: {e}"))?;
+            }
+        }
+        Ok(())
+    }
+
+    let mut files = 0;
+    let mut bytes = 0;
+    walk(&mut writer, source, "", options, &mut files, &mut bytes)?;
+    writer
+        .finish()
+        .map_err(|e| format!("Failed to finalize backup: {e}"))?;
+    Ok(())
+}
+
+pub async fn backup_deployment(name: String, app_data_dir: PathBuf) -> Result<PathBuf, crate::error::AppError> {
     let name = validate_name(&name)?;
     let root = ensure_deployment_root().await?;
     let path = root.join(name);
@@ -219,15 +293,45 @@ pub async fn delete_deployment(name: String) -> Result<(), String> {
         .await
         .map_err(|e| format!("Deployment not found: {e}"))?;
     if metadata.file_type().is_symlink() || !metadata.is_dir() {
-        return Err("Deployment must be a normal directory inside htdocs".to_string());
+        return Err("Deployment must be a normal directory inside htdocs".to_string().into());
     }
     let canonical = crate::paths::ensure_existing_path_in_xampp(&path)?;
     if canonical.parent() != Some(root.as_path()) {
-        return Err("Refusing to delete a path outside htdocs".to_string());
+        return Err("Refusing to back up a path outside htdocs".to_string().into());
     }
-    fs::remove_dir_all(canonical)
+    let backups_dir = app_data_dir.join("deployment-backups");
+    fs::create_dir_all(&backups_dir)
         .await
-        .map_err(|e| format!("Failed to remove deployment: {e}"))
+        .map_err(|e| format!("Failed to create backups folder: {e}"))?;
+    let timestamp = chrono::Local::now().format("%Y%m%d-%H%M%S").to_string();
+    let destination = backups_dir.join(format!("{name}-{timestamp}.zip"));
+    let source_for_zip = canonical.clone();
+    let destination_for_zip = destination.clone();
+    tokio::task::spawn_blocking(move || zip_directory_tree(&source_for_zip, &destination_for_zip))
+        .await
+        .map_err(|e| format!("Backup task failed: {e}"))??;
+    Ok(destination)
+}
+
+pub async fn delete_deployment(name: String) -> Result<(), crate::error::AppError> {
+    let name = validate_name(&name)?;
+    let root = ensure_deployment_root().await?;
+    let path = root.join(name);
+    let metadata = fs::symlink_metadata(&path)
+        .await
+        .map_err(|e| format!("Deployment not found: {e}"))?;
+    if metadata.file_type().is_symlink() || !metadata.is_dir() {
+        return Err("Deployment must be a normal directory inside htdocs".to_string().into());
+    }
+    let canonical = crate::paths::ensure_existing_path_in_xampp(&path)?;
+    if canonical.parent() != Some(root.as_path()) {
+        return Err("Refusing to delete a path outside htdocs".to_string().into());
+    }
+    let canonical_for_recycle = canonical.clone();
+    tokio::task::spawn_blocking(move || crate::recycle::recycle_path(&canonical_for_recycle))
+        .await
+        .map_err(|e| format!("Delete task failed: {e}"))??;
+    Ok(())
 }
 
 #[cfg(test)]

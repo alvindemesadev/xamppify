@@ -12,6 +12,7 @@ export const listDeployments = () => invoke<Deployment[]>("list_deployments");
 export const createDeployment = (name: string, template: "html" | "php") => invoke<Deployment>("create_deployment", { name, template });
 export const importDeployment = (name: string, sourcePath: string) => invoke<Deployment>("import_deployment", { name, sourcePath });
 export const deleteDeployment = (name: string) => invoke<void>("delete_deployment", { name });
+export const backupDeployment = (name: string) => invoke<string>("backup_deployment", { name });
 
 export const startService = (machineId: string, service: string) =>
   invoke<void>("start_service", { machineId, service });
@@ -32,10 +33,18 @@ export const deletePath = (path: string) => invoke<void>("delete_path", { path }
 export const renamePath = (path: string, newName: string) => invoke<string>("rename_path", { path, newName });
 export const uploadFiles = (destination: string, sourcePaths: string[]) => invoke<void>("upload_files", { destination, sourcePaths });
 export const uploadFolder = (destination: string, sourcePath: string) => invoke<void>("upload_folder", { destination, sourcePath });
+export const uploadPaths = (destination: string, sourcePaths: string[]) => invoke<void>("upload_paths", { destination, sourcePaths });
+export const readImage = (path: string) =>
+  invoke<{ mime: string; data: string }>("read_image", { path });
 
 export const mysqlConnect = (host: string | null, port: number | null, user: string, password: string) =>
   invoke<void>("mysql_connect", { host, port, user, password });
 export const mysqlDisconnect = () => invoke<void>("mysql_disconnect");
+export const saveMysqlCredentials = (user: string, password: string) =>
+  invoke<void>("save_mysql_credentials", { user, password });
+export const getMysqlCredentials = () =>
+  invoke<{ user: string; password: string } | null>("get_mysql_credentials");
+export const deleteMysqlCredentials = () => invoke<void>("delete_mysql_credentials");
 export const listDatabases = () => invoke<string[]>("list_databases");
 export const listTables = (database: string) =>
   invoke<string[]>("list_tables", { database });
@@ -53,6 +62,10 @@ export const getKnownConfigs = () =>
   invoke<{ name: string; path: string; category: string }[]>("get_known_configs");
 export const parseIniSections = (content: string) =>
   invoke<{ name: string; line: number }[]>("parse_ini_sections", { content });
+export const testApacheConfig = () =>
+  invoke<{ ok: boolean; output: string }>("test_apache_config");
+export const saveConfigFile = (path: string, content: string) =>
+  invoke<string>("save_config_file", { path, content });
 
 export const listCertificates = () =>
   invoke<{ name: string; path: string; is_key: boolean }[]>("list_certificates");
@@ -112,6 +125,37 @@ export type SyncHistoryEntry = {
 };
 export const getSyncHistory = () => invoke<SyncHistoryEntry[]>("get_sync_history");
 export const clearSyncHistory = () => invoke<void>("clear_sync_history");
+export type SyncScheduleStatus = {
+  source: string;
+  destination: string;
+  remote_host: string;
+  interval_minutes: number;
+  last_run: string | null;
+  next_run: string | null;
+};
+export const setScheduledSync = (
+  source: string,
+  destination: string,
+  remoteHost: string,
+  intervalMinutes: number,
+  username?: string,
+  password?: string
+) =>
+  invoke<void>("set_scheduled_sync", {
+    source,
+    destination,
+    remoteHost,
+    intervalMinutes,
+    username: username || null,
+    password: password || null,
+  });
+export const stopScheduledSync = () => invoke<void>("stop_scheduled_sync");
+export const getScheduledSync = () =>
+  invoke<SyncScheduleStatus | null>("get_scheduled_sync");
+export type SearchMatch = { path: string; line_number: number; line: string };
+export const searchHtdocs = (query: string, literal: boolean) =>
+  invoke<SearchMatch[]>("search_htdocs", { query, literal });
+
 export const getLocalPerformance = () =>
   invoke<{ cpu_percent: number; memory_percent: number; memory_used_gb: number; memory_total_gb: number; disk_percent: number; disk_free_gb: number; disk_total_gb: number; uptime_days: number }>("get_local_performance");
 export const generateSelfSigned = (commonName: string, days: number) =>
