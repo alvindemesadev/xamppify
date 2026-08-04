@@ -18,7 +18,6 @@ const Logs = lazy(() => import("@/pages/Logs"));
 const Settings = lazy(() => import("@/pages/Settings"));
 const FileSync = lazy(() => import("@/pages/FileSync"));
 const Performance = lazy(() => import("@/pages/Performance"));
-const SearchPage = lazy(() => import("@/pages/Search"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,7 +52,6 @@ function App() {
               <Route path="/settings" element={<Settings />} />
               <Route path="/file-sync" element={<FileSync />} />
               <Route path="/performance" element={<Performance />} />
-              <Route path="/search" element={<SearchPage />} />
             </Routes>
           </Suspense>
         </AppShell>

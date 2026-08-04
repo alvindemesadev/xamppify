@@ -69,4 +69,49 @@ export interface Deployment {
   url: string;
   network_url: string;
   modified: string;
+  framework: string;
+  tags: string[];
+  pinned: boolean;
+  custom_domain: string | null;
+  linked_db: string | null;
+  vhost_enabled: boolean;
+  ssl_enabled: boolean;
+  last_opened: string | null;
+  has_env: boolean;
+  has_composer: boolean;
+  has_package_json: boolean;
+  vhost_domain: string | null;
+}
+
+export type FrameworkId = "html" | "php" | "laravel" | "wordpress" | "react" | "node" | "custom";
+
+export interface FrameworkInfo {
+  id: string;
+  label: string;
+}
+
+export interface BackupInfo {
+  deployment: string;
+  timestamp: string;
+  path: string;
+  size: number;
+}
+
+export interface RunOutput {
+  success: boolean;
+  output: string;
+}
+
+export interface GitInfo {
+  is_git: boolean;
+  branch: string | null;
+  last_commit: string | null;
+  dirty: boolean;
+}
+
+export interface VhostInfo {
+  domain: string;
+  root: string;
+  port: number;
+  ssl: boolean;
 }

@@ -4,6 +4,7 @@ type Hotkey = {
   key: string;
   ctrl?: boolean;
   meta?: boolean;
+  shift?: boolean;
   handler: () => void;
 };
 
@@ -13,10 +14,12 @@ export function useHotkeys(hotkeys: Hotkey[]) {
       for (const h of hotkeys) {
         const ctrl = h.ctrl ?? false;
         const meta = h.meta ?? false;
+        const shift = h.shift ?? false;
         if (
           e.key.toLowerCase() === h.key.toLowerCase() &&
           e.ctrlKey === ctrl &&
           e.metaKey === meta &&
+          e.shiftKey === shift &&
           !e.repeat
         ) {
           e.preventDefault();

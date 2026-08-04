@@ -140,6 +140,39 @@ pub fn apache_port() -> u16 {
     80
 }
 
+/// Reads the MySQL `port` directive from my.ini to get the configured port.
+/// Falls back to 3306 if not found.
+pub fn mysql_port() -> u16 {
+    let my_ini = xampp_root().join(r"mysql\bin\my.ini");
+    let content = std::fs::read_to_string(my_ini).ok();
+    let Some(content) = content else {
+        return 3306;
+    };
+    for line in content.lines() {
+        let line = line.trim();
+        if line.starts_with("port") {
+            let rest = line.trim_start_matches("port");
+            let rest = rest.trim_start_matches('=');
+            if let Some(port_str) = rest.trim().split(|c: char| !c.is_ascii_digit()).next() {
+                if !port_str.is_empty() {
+                    if let Ok(port) = port_str.parse::<u16>() {
+                        return port;
+                    }
+                }
+            }
+        }
+    }
+    3306
+}
+
+pub fn vhosts_conf_path() -> PathBuf {
+    xampp_root().join(r"apache\conf\extra\httpd-vhosts.conf")
+}
+
+pub fn hosts_file_path() -> PathBuf {
+    PathBuf::from(r"C:\Windows\System32\drivers\etc\hosts")
+}
+
 /// Returns the primary LAN IPv4 address using a UDP trick (no data sent).
 pub fn local_ip() -> String {
     if let Ok(socket) = std::net::UdpSocket::bind("0.0.0.0:0") {

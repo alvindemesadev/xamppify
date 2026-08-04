@@ -11,7 +11,6 @@ mod log;
 mod paths;
 mod performance;
 mod recycle;
-mod search;
 mod service;
 mod ssl_manager;
 mod sync_scheduler;
@@ -242,6 +241,24 @@ pub fn run() {
             commands::deployment_commands::import_deployment,
             commands::deployment_commands::delete_deployment,
             commands::deployment_commands::backup_deployment,
+            commands::deployment_commands::update_deployment_meta,
+            commands::deployment_commands::open_deployment,
+            commands::deployment_commands::duplicate_deployment,
+            commands::deployment_commands::git_import_deployment,
+            commands::deployment_commands::set_custom_domain,
+            commands::deployment_commands::toggle_vhost,
+            commands::deployment_commands::enable_deployment_ssl,
+            commands::deployment_commands::read_deployment_env,
+            commands::deployment_commands::write_deployment_env,
+            commands::deployment_commands::run_dependency_command,
+            commands::deployment_commands::get_git_info,
+            commands::deployment_commands::list_backups,
+            commands::deployment_commands::restore_deployment_backup,
+            commands::deployment_commands::get_frameworks,
+            commands::deployment_commands::list_vhosts,
+            commands::deployment_commands::get_detected_port,
+            commands::deployment_commands::provision_database,
+            commands::deployment_commands::set_linked_database,
             commands::ssl_commands::list_certificates,
             commands::ssl_commands::read_certificate,
             commands::ssl_commands::generate_self_signed,
@@ -253,7 +270,6 @@ pub fn run() {
             commands::file_sync_commands::stop_scheduled_sync,
             commands::file_sync_commands::get_scheduled_sync,
             commands::performance_commands::get_local_performance,
-            commands::search_commands::search_htdocs,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

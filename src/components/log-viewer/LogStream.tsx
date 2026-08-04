@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { LogLine } from "@/lib/types";
 
-interface LogStreamProps { source: "Apache" | "MySQL"; }
+interface LogStreamProps { source: "Apache" | "MySQL"; deploymentFilter?: string; }
 const levels = ["ERROR", "WARN", "INFO", "DEBUG"];
 const levelStyle: Record<string, string> = { ERROR: "bg-destructive/10 text-destructive", WARN: "bg-amber-500/10 text-amber-700 dark:text-amber-400", INFO: "bg-sky-500/10 text-sky-700 dark:text-sky-400", DEBUG: "bg-muted text-muted-foreground" };
 
@@ -21,7 +21,7 @@ function matchFilter(line: LogLine, filter: string, regex: boolean): boolean {
   }
 }
 
-export function LogStream({ source }: LogStreamProps) {
+export function LogStream({ source, deploymentFilter }: LogStreamProps) {
   const [streamPaused, setStreamPaused] = useState(false);
   const { data: logs } = useLogs(source.toLowerCase(), streamPaused);
   const [filter, setFilter] = useState("");
@@ -33,7 +33,11 @@ export function LogStream({ source }: LogStreamProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const invalidRegex = regex && !!filter.trim() && (() => { try { new RegExp(filter, "i"); return false; } catch { return true; } })();
-  const filtered = useMemo(() => logs?.filter((line) => visibleLevels.includes(line.level) && matchFilter(line, filter, regex)) ?? [], [logs, filter, regex, visibleLevels]);
+  const filtered = useMemo(() => (logs ?? []).filter((line) =>
+    visibleLevels.includes(line.level)
+    && matchFilter(line, filter, regex)
+    && (!deploymentFilter || line.message.includes(deploymentFilter) || line.message.includes(deploymentFilter.toLowerCase()))
+  ), [logs, filter, regex, visibleLevels, deploymentFilter]);
 
   useEffect(() => { if (autoScroll) bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [filtered, autoScroll]);
   const toggleLevel = (level: string) => setVisibleLevels((current) => current.includes(level) ? current.filter((item) => item !== level) : [...current, level]);

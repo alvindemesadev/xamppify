@@ -7,7 +7,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useHotkeys } from "@/hooks/use-hotkeys";
 import { useUiStore } from "@/stores/ui-store";
-import { getDiscoveredMachines, getServiceStatus, restartService, startService, stopService } from "@/lib/ipc";
+import { getDiscoveredMachines, getServiceStatus, listDeployments, restartService, startService, stopService } from "@/lib/ipc";
 
 type Action = {
   id: string;
@@ -21,7 +21,6 @@ const defaultActions: Action[] = [
   { id: "deployments", label: "Go to Deployments", to: "/" },
   { id: "logs", label: "Go to Logs", to: "/logs" },
   { id: "files", label: "Go to Files", to: "/files" },
-  { id: "search", label: "Go to Search", to: "/search" },
   { id: "database", label: "Go to Database", to: "/database" },
   { id: "config", label: "Go to Config", to: "/config" },
   { id: "ssl", label: "Go to SSL", to: "/ssl" },
@@ -41,6 +40,10 @@ export function CommandPalette() {
   const { data: machines } = useQuery({
     queryKey: ["discovered-machines"],
     queryFn: getDiscoveredMachines,
+  });
+  const { data: deployments } = useQuery({
+    queryKey: ["deployments"],
+    queryFn: listDeployments,
   });
 
   const isMac = navigator.platform.toUpperCase().includes("MAC");
@@ -128,7 +131,14 @@ export function CommandPalette() {
       ]
     : [];
 
-  const allActions: Action[] = [...defaultActions, ...serviceActions];
+  const deploymentActions: Action[] = (deployments ?? []).slice(0, 10).map((d) => ({
+    id: `open-${d.name}`,
+    label: `Open ${d.name}`,
+    hint: "deployment",
+    action: () => navigate("/files", { state: { deploymentPath: d.path, deploymentName: d.name } }),
+  }));
+
+  const allActions: Action[] = [...defaultActions, ...serviceActions, ...deploymentActions];
 
   const filtered = query.trim()
     ? allActions.filter((a) =>

@@ -4,7 +4,6 @@ use std::sync::OnceLock;
 use tokio::sync::Mutex;
 
 const LOCAL_MYSQL: &str = "127.0.0.1";
-const MYSQL_PORT: u16 = 3306;
 
 static POOL: OnceLock<Mutex<Option<Pool>>> = OnceLock::new();
 
@@ -31,7 +30,7 @@ pub async fn connect(
     password: String,
 ) -> Result<(), crate::error::AppError> {
     let host = host.unwrap_or_else(|| LOCAL_MYSQL.to_string());
-    let port = port.unwrap_or(MYSQL_PORT);
+    let port = port.unwrap_or_else(crate::paths::mysql_port);
 
     let opts = build_opts(&host, port, &user, &password);
     let new_pool = Pool::new(opts);
@@ -201,6 +200,27 @@ pub async fn export_database(database: &str) -> Result<String, crate::error::App
     }
 
     Ok(output)
+}
+
+pub async fn create_database(database: &str) -> Result<(), crate::error::AppError> {
+    let mut guard = pool().lock().await;
+    let p = guard
+        .as_mut()
+        .ok_or_else(|| "Not connected to MySQL".to_string())?;
+    let mut conn = p
+        .get_conn()
+        .await
+        .map_err(|e| format!("Connection failed: {}", e))?;
+    conn.exec_drop(
+        format!(
+            "CREATE DATABASE IF NOT EXISTS {} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
+            quote_identifier(database)
+        ),
+        (),
+    )
+    .await
+    .map_err(|e| format!("Failed to create database: {e}"))?;
+    Ok(())
 }
 
 #[cfg(test)]

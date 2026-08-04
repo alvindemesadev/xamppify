@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Database, Download, Play, Unplug } from "lucide-react";
-import { exportDatabase, getMysqlCredentials, deleteMysqlCredentials, listDatabases, listTables, mysqlConnect, mysqlDisconnect, runQuery, saveMysqlCredentials } from "@/lib/ipc";
+import { exportDatabase, getDetectedPort, getMysqlCredentials, deleteMysqlCredentials, listDatabases, listTables, mysqlConnect, mysqlDisconnect, runQuery, saveMysqlCredentials } from "@/lib/ipc";
 import type { QueryResult } from "@/lib/types";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ export default function DatabaseManager() {
   const [selectedDb, setSelectedDb] = useState<string | null>(null); const [query, setQuery] = useState("SELECT 1"); const [result, setResult] = useState<QueryResult | null>(null); const [error, setError] = useState<string | null>(null); const [history, setHistory] = useState<string[]>([]); const [confirmQuery, setConfirmQuery] = useState(false); const [exportedSchema, setExportedSchema] = useState<string | null>(null);
   const queryClient = useQueryClient(); const selectedMachineId = useUiStore((state) => state.selectedMachineId); const selectedMachine = useMachineStore((state) => state.machines.find((machine) => machine.id === selectedMachineId));
   useEffect(() => { if (!connected && selectedMachine) setHost(selectedMachine.ip); }, [connected, selectedMachine]);
+  useEffect(() => { getDetectedPort().then(({ mysql }) => setPort(String(mysql))).catch(() => undefined); }, []);
   useEffect(() => { getMysqlCredentials().then((creds) => { if (creds) { setUser(creds.user); setPassword(creds.password); setRemember(true); } }).catch(() => undefined); }, []);
   const connectMutation = useMutation({ mutationFn: () => mysqlConnect(host, parseInt(port) || 3306, user, password), onSuccess: () => { if (remember) saveMysqlCredentials(user, password).catch(() => undefined); setConnected(true); setError(null); queryClient.invalidateQueries({ queryKey: ["databases"] }); }, onError: (reason: Error) => setError(reason.message) });
   const disconnectMutation = useMutation({ mutationFn: mysqlDisconnect, onSuccess: () => { setConnected(false); setSelectedDb(null); setResult(null); } });

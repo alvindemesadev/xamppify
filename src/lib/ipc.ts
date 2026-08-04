@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { AppHealth, Deployment, Machine, ServiceStatus, FileEntry, QueryResult, LogLine } from "./types";
+import type { AppHealth, Deployment, Machine, ServiceStatus, FileEntry, QueryResult, LogLine, FrameworkInfo, BackupInfo, RunOutput, GitInfo, VhostInfo } from "./types";
 
 export const startDiscovery = () => invoke<void>("start_discovery");
 export const stopDiscovery = () => invoke<void>("stop_discovery");
@@ -9,10 +9,32 @@ export const getAppHealth = () => invoke<AppHealth>("get_app_health");
 export const addManualMachine = (ip: string) => invoke<Machine>("add_manual_machine", { ip });
 
 export const listDeployments = () => invoke<Deployment[]>("list_deployments");
-export const createDeployment = (name: string, template: "html" | "php") => invoke<Deployment>("create_deployment", { name, template });
-export const importDeployment = (name: string, sourcePath: string) => invoke<Deployment>("import_deployment", { name, sourcePath });
+export const createDeployment = (name: string, framework: string) => invoke<Deployment>("create_deployment", { name, framework });
+export const importDeployment = (name: string, sourcePath: string, framework?: string) => invoke<Deployment>("import_deployment", { name, sourcePath, framework: framework || null });
 export const deleteDeployment = (name: string) => invoke<void>("delete_deployment", { name });
 export const backupDeployment = (name: string) => invoke<string>("backup_deployment", { name });
+export const updateDeploymentMeta = (name: string, updates: { framework?: string; tags?: string[]; pinned?: boolean; linked_db?: string; last_opened?: boolean }) =>
+  invoke<Deployment>("update_deployment_meta", { name, updates });
+export const openDeployment = (name: string) => invoke<Deployment>("open_deployment", { name });
+export const duplicateDeployment = (name: string, newName: string) => invoke<Deployment>("duplicate_deployment", { name, newName });
+export const gitImportDeployment = (name: string, repoUrl: string, framework?: string) => invoke<Deployment>("git_import_deployment", { name, repoUrl, framework: framework || null });
+export const setCustomDomain = (name: string, domain: string | null) => invoke<Deployment>("set_custom_domain", { name, domain });
+export const toggleVhost = (name: string, enabled: boolean) => invoke<Deployment>("toggle_vhost", { name, enabled });
+export const enableDeploymentSsl = (name: string) => invoke<Deployment>("enable_deployment_ssl", { name });
+export const readDeploymentEnv = (name: string) => invoke<string>("read_deployment_env", { name });
+export const writeDeploymentEnv = (name: string, content: string) => invoke<void>("write_deployment_env", { name, content });
+export const runDependencyCommand = (name: string, tool: string, action: string) =>
+  invoke<RunOutput>("run_dependency_command", { name, tool, action });
+export const getGitInfo = (name: string) => invoke<GitInfo>("get_git_info", { name });
+export const listBackups = (name?: string) => invoke<BackupInfo[]>("list_backups", { name: name || null });
+export const restoreDeploymentBackup = (name: string, backupPath: string) => invoke<Deployment>("restore_deployment_backup", { name, backupPath });
+export const getFrameworks = () => invoke<FrameworkInfo[]>("get_frameworks");
+export const listVhosts = () => invoke<VhostInfo[]>("list_vhosts");
+export const getDetectedPort = () => invoke<{ apache: number; mysql: number }>("get_detected_port");
+export const provisionDatabase = (deploymentName: string, databaseName?: string) =>
+  invoke<string>("provision_database", { deploymentName, databaseName: databaseName || null });
+export const setLinkedDatabase = (name: string, databaseName: string) =>
+  invoke<Deployment>("set_linked_database", { name, databaseName });
 
 export const startService = (machineId: string, service: string) =>
   invoke<void>("start_service", { machineId, service });
@@ -152,9 +174,6 @@ export const setScheduledSync = (
 export const stopScheduledSync = () => invoke<void>("stop_scheduled_sync");
 export const getScheduledSync = () =>
   invoke<SyncScheduleStatus | null>("get_scheduled_sync");
-export type SearchMatch = { path: string; line_number: number; line: string };
-export const searchHtdocs = (query: string, literal: boolean) =>
-  invoke<SearchMatch[]>("search_htdocs", { query, literal });
 
 export const getLocalPerformance = () =>
   invoke<{ cpu_percent: number; memory_percent: number; memory_used_gb: number; memory_total_gb: number; disk_percent: number; disk_free_gb: number; disk_total_gb: number; uptime_days: number }>("get_local_performance");
