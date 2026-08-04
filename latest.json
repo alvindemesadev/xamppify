@@ -1,11 +1,11 @@
-﻿{
-    "version":  "0.3.0",
-    "notes":  "Auto-update support - Xamppify now updates itself from GitHub Releases",
-    "pub_date":  "2026-08-04T08:22:36.0508597Z",
+{
+    "version":  "0.4.0",
+    "notes":  "Full roadmap completion - native Win32 performance, Recycle Bin support, file logging, ripgrep search, MySQL credential manager, deployment zip backups, scheduled file sync, image preview, config safety, log upgrades, route splitting, and 21 passing tests",
+    "pub_date":  "2026-08-04T15:39:12.8508572Z",
     "platforms":  {
                       "windows-x86_64":  {
-                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTRk1HbmVkeXlNdkp6MDl5VEJFeFdlUHBaZ0xwV0ovejltL2tuNXNleHZaRUh4cVlyWTZvUmtGSVJNLy8vTERBcjZ3ZWx5WEhFM0lGVGZTY20xSHBpQVlDUnFuOS9LZ2dzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1ODMxNzQ5CWZpbGU6WGFtcHBpZnlfMC4zLjBfeDY0LXNldHVwLmV4ZQpYR2FYQkhBbFI2TWRBSlNhaC9NUkRhQXh2d3p3NGE4dVBiWEpCRVFBN0t5WkhMQlVkU3FBci90eEt1UDVpS0owKzdacVBDeTBFTnNvYUdPRmRETFdEZz09Cg==",
-                                             "url":  "https://github.com/alvindemesadev/xamppify/releases/download/v0.3.0/Xamppify_0.3.0_x64-setup.exe"
+                                             "signature":  "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTRk1HbmVkeXlNdkJaa0E3ZDhGUmtwcVErOTA0TEV2YnQ3VmtGSXNuUnMyUE1ncVg4VFBmekxNU2FXaFJjb213MGRKSmNrOGJmSE9CdWs5OER3NzFRajA4UjBtaXNhZEFRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzg1ODU3OTE3CWZpbGU6WGFtcHBpZnlfMC40LjBfeDY0LXNldHVwLmV4ZQpWK3J3b0tWbGJWVTNPTWN2bTI4TXJDS3dZa2QzbWFJKzgvRGdUdWU5ZThVeml3REFMRVovQmwzQiszc3NTczJHcXZ3OXg3UldKa29jVmJKbEYzWmJDdz09Cg==",
+                                             "url":  "https://github.com/alvindemesadev/xamppify/releases/download/v0.4.0/Xamppify_0.4.0_x64-setup.exe"
                                          }
                   }
 }
