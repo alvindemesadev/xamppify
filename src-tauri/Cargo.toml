@@ -1,6 +1,6 @@
 [package]
 name = "xamppify"
-version = "0.2.1"
+version = "0.3.0"
 description = "Xamppify - Your local PHP workspace, simplified"
 authors = ["Alvin"]
 edition = "2021"
