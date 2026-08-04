@@ -33,7 +33,7 @@ export function Onboarding() {
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-2 gap-3 text-xs text-muted-foreground">
+        <div className="grid grid-cols-1 gap-3 text-xs text-muted-foreground sm:grid-cols-2">
           <div className="flex gap-2"><FolderCog className="size-4" />Set <code>XAMPP_HOME</code> before launch for a custom installation.</div>
           <div className="flex gap-2"><FolderPlus className="size-4" />New deployments are created safely inside <code>htdocs</code>.</div>
         </div>

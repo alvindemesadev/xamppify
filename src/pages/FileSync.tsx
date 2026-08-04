@@ -304,8 +304,8 @@ export default function FileSyncPage() {
                   <p className="flex items-center gap-2 font-medium text-emerald-600 dark:text-emerald-400">
                     <TimerReset className="size-4" /> Running every {schedule.interval_minutes} minutes
                   </p>
-                  <p className="font-mono text-muted-foreground">
-                    {schedule.source} → {schedule.remote_host}
+                  <p className="font-mono text-muted-foreground truncate" title={schedule.source + ' -> ' + schedule.remote_host}>
+                    {schedule.source} {'->'} {schedule.remote_host}
                   </p>
                   {schedule.last_run && (
                     <p className="text-muted-foreground">Last run: {schedule.last_run}</p>
@@ -353,7 +353,7 @@ export default function FileSyncPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-xs">
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                   <div className={`flex items-center gap-1.5 rounded p-2 border ${testResult.ping_ok ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400" : "bg-red-500/10 border-red-500/20 text-red-600 dark:text-red-400"}`}>
                     {testResult.ping_ok ? <CheckCircle2 className="size-4" /> : <XCircle className="size-4" />}
                     <span>Ping: {testResult.ping_ok ? "OK" : "Failed"}</span>
@@ -423,7 +423,7 @@ export default function FileSyncPage() {
                   ) : (
                     <XCircle className="mt-0.5 size-4 shrink-0 text-red-500" />
                   )}
-                  <div className="overflow-x-auto whitespace-pre-wrap flex-1">
+                  <div className="overflow-x-auto whitespace-pre-wrap break-words flex-1">
                     {log.timestamp && (
                       <div className="text-[10px] opacity-60 mb-0.5">{log.timestamp}</div>
                     )}
@@ -456,7 +456,7 @@ export default function FileSyncPage() {
                   </li>
                 </ol>
                 <div className="flex items-center gap-2 bg-muted p-2 rounded border text-[11px] font-mono text-foreground">
-                  <span className="flex-1 overflow-x-auto">
+                  <span className="flex-1 overflow-x-auto break-all">
                     reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1 /f
                   </span>
                   <Button size="icon" variant="ghost" className="size-7 shrink-0" onClick={handleCopyRegistryCommand}>

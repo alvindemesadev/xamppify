@@ -36,7 +36,7 @@ export function Sidebar({ collapsed = false }: { collapsed?: boolean }) {
           tabIndex={collapsed ? -1 : undefined}
           className={({ isActive }) =>
             cn(
-              "flex h-9 min-w-46 items-center gap-3 rounded-md px-2 text-sm text-muted-foreground transition-[background-color,color,transform] duration-200 hover:bg-surface-hover hover:text-foreground",
+              "flex h-9 min-w-0 items-center gap-3 rounded-md px-2 text-sm text-muted-foreground transition-[background-color,color,transform] duration-200 hover:bg-surface-hover hover:text-foreground",
               collapsed && "translate-x-2 opacity-0 pointer-events-none",
               isActive && "bg-surface-hover text-foreground"
             )
@@ -57,7 +57,7 @@ export function Sidebar({ collapsed = false }: { collapsed?: boolean }) {
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           tabIndex={collapsed ? -1 : undefined}
           className={cn(
-            "flex h-9 min-w-46 w-full items-center gap-3 rounded-md px-2 text-sm text-muted-foreground transition-[background-color,color,transform] duration-200 hover:bg-surface-hover hover:text-foreground",
+            "flex h-9 min-w-0 w-full items-center gap-3 rounded-md px-2 text-sm text-muted-foreground transition-[background-color,color,transform] duration-200 hover:bg-surface-hover hover:text-foreground",
             collapsed && "translate-x-2 opacity-0 pointer-events-none"
           )}
           title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}

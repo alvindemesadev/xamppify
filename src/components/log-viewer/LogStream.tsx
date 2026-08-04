@@ -50,14 +50,14 @@ export function LogStream({ source }: LogStreamProps) {
         </div>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <div className="relative min-w-44 flex-1">
-          <Input value={filter} onChange={(event) => setFilter(event.target.value)} placeholder={regex ? "Regex search (e.g. ^\\[error\\]|fatal)" : "Search messages or levels"} className={`min-w-44 flex-1 ${invalidRegex ? "border-destructive" : ""}`} aria-label={`Search ${source} log`} />
+        <div className="relative min-w-0 flex-1">
+          <Input value={filter} onChange={(event) => setFilter(event.target.value)} placeholder={regex ? "Regex search (e.g. ^\\[error\\]|fatal)" : "Search messages or levels"} className={`min-w-0 flex-1 ${invalidRegex ? "border-destructive" : ""}`} aria-label={`Search ${source} log`} />
           <Button variant={regex ? "secondary" : "ghost"} size="icon-xs" className="absolute right-1.5 top-1/2 -translate-y-1/2" onClick={() => setRegex(!regex)} title={regex ? "Using regular expressions" : "Use regular expressions"} aria-label="Toggle regular expression search" aria-pressed={regex}><Regex /></Button>
         </div>
           {levels.map((level) => <Button key={level} variant={visibleLevels.includes(level) ? "secondary" : "ghost"} size="xs" onClick={() => toggleLevel(level)} aria-pressed={visibleLevels.includes(level)}>{level}</Button>)}
       </div>
     </div>
-    <ScrollArea className="min-h-0 flex-1"><div className={`font-mono text-xs ${wrap ? "" : "min-w-[38rem]"}`}>
+    <ScrollArea className="min-h-0 flex-1"><div className={`font-mono text-xs ${wrap ? "" : "min-w-0 overflow-x-auto"}`}>
       {filtered.length === 0 ? <Empty text={invalidRegex ? "The regular expression is invalid." : logs?.length ? "No entries match the current filters." : "No log entries have been recorded yet."} /> : <>{filtered.map((line: LogLine, index) => <div key={`${line.timestamp}-${index}`} className={`group grid grid-cols-[3rem_8rem_4rem_minmax(0,1fr)] gap-3 border-b border-border/60 px-4 py-2 hover:bg-muted/50 ${wrap ? "break-words" : ""}`}><span className="text-right text-muted-foreground">{index + 1}</span><span className="text-muted-foreground">{line.timestamp || "—"}</span><span className={`w-fit rounded px-1.5 py-0.5 text-[10px] font-bold ${levelStyle[line.level] ?? levelStyle.INFO}`}>{line.level}</span><span className={`flex items-start gap-2 text-foreground ${wrap ? "whitespace-pre-wrap break-words" : "whitespace-pre"}`}><span className="flex-1">{line.message}</span><button onClick={() => { navigator.clipboard.writeText(line.message).catch(() => {}); setCopiedLine(index); setTimeout(() => setCopiedLine(null), 1500); }} className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" title="Copy line">{copiedLine === index ? <CopyCheck className="size-3 text-green-400" /> : <Copy className="size-3 text-muted-foreground" />}</button></span></div>)}<div ref={bottomRef} /></>}
     </div></ScrollArea>
   </section>;

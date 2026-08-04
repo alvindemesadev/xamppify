@@ -7,7 +7,7 @@ const Select = SelectPrimitive.Root;
 const SelectValue = SelectPrimitive.Value;
 
 function SelectTrigger({ className, children, ...props }: React.ComponentProps<typeof SelectPrimitive.Trigger>) {
-  return <SelectPrimitive.Trigger className={cn("flex h-8 min-w-36 items-center justify-between gap-2 rounded-lg border border-input bg-background px-2.5 text-sm text-foreground outline-none transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50", className)} {...props}>{children}<SelectPrimitive.Icon><ChevronDown className="size-4 text-muted-foreground" /></SelectPrimitive.Icon></SelectPrimitive.Trigger>;
+  return <SelectPrimitive.Trigger className={cn("flex h-8 min-w-0 items-center justify-between gap-2 rounded-lg border border-input bg-background px-2.5 text-sm text-foreground outline-none transition-colors hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50", className)} {...props}>{children}<SelectPrimitive.Icon><ChevronDown className="size-4 text-muted-foreground" /></SelectPrimitive.Icon></SelectPrimitive.Trigger>;
 }
 
 function SelectContent({ className, children, ...props }: React.ComponentProps<typeof SelectPrimitive.Content>) {

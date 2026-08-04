@@ -14,7 +14,7 @@ export function TopBar() {
         {sidebarOpen ? <PanelLeftClose className="size-4 transition-transform duration-200" /> : <PanelLeft className="size-4 transition-transform duration-200" />}
       </button>
       <span className="text-sm font-medium">Workspace</span>
-      <span className="ml-auto rounded-md bg-muted px-2.5 py-1.5 text-xs text-muted-foreground">Local XAMPP workspace</span>
+      <span className="ml-auto hidden truncate rounded-md bg-muted px-2.5 py-1.5 text-xs text-muted-foreground sm:inline max-w-48">Local XAMPP workspace</span>
     </header>
   );
 }

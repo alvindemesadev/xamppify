@@ -58,13 +58,13 @@ export function MachineCard({ machine }: MachineCardProps) {
           <Badge variant={machine.online ? "default" : "secondary"} className="text-xs">{machine.online ? "Online" : "Offline"}</Badge>
         </div>
 
-        <div className="mb-3 flex items-center justify-between text-xs text-muted-foreground"><span>{machine.ip}</span><span title={machine.last_seen}>Seen {lastSeen}</span></div>
+        <div className="mb-3 flex items-center justify-between gap-2 text-xs text-muted-foreground"><span className="truncate">{machine.ip}</span><span className="shrink-0" title={machine.last_seen}>Seen {lastSeen}</span></div>
 
         <div className="mb-3 space-y-2">
           {services.length === 0 ? <p className="text-xs text-muted-foreground">{isFetching ? "Checking services…" : "No supported services detected"}</p> : services.map((service: ServiceStatus) => (
             <div key={service.name} className="flex items-center gap-2 text-xs">
               <ServiceIcon name={service.name} /><StatusDot status={service.status} />
-              <span className="w-16 text-foreground">{service.name}</span><span className="flex-1 text-muted-foreground">{service.status} · :{service.port}</span>
+              <span className="w-16 truncate text-foreground">{service.name}</span><span className="flex-1 text-muted-foreground">{service.status} · :{service.port}</span>
               <div className="flex gap-1">
                 {service.status !== "Running" && <Button variant="ghost" size="icon-xs" disabled={isPending || !machine.online} onClick={() => setPendingAction({ service: service.name, action: "start" })} aria-label={`Start ${service.name}`} title={`Start ${service.name}`}><Play /></Button>}
                 {service.status === "Running" && <Button variant="ghost" size="icon-xs" disabled={isPending || !machine.online} onClick={() => setPendingAction({ service: service.name, action: "restart" })} aria-label={`Restart ${service.name}`} title={`Restart ${service.name}`}><RefreshCw /></Button>}
@@ -74,7 +74,7 @@ export function MachineCard({ machine }: MachineCardProps) {
           ))}
         </div>
 
-        <div className="flex items-center justify-between border-t border-border pt-2 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-1 border-t border-border pt-2 text-xs text-muted-foreground">
           <div className="flex gap-1"><Button variant="ghost" size="xs" disabled={isPending || !machine.online || !services.length} onClick={() => setPendingAction({ service: "all services", action: "start-all" })}>Start all</Button><Button variant="ghost" size="xs" disabled={isPending || !machine.online || !services.length} onClick={() => setPendingAction({ service: "all services", action: "stop-all" })}>Stop all</Button></div>
           <Button variant="ghost" size="icon-xs" onClick={() => refetch()} disabled={isFetching} aria-label={`Refresh ${machine.hostname}`} title="Refresh service status"><RotateCw className={isFetching ? "animate-spin" : ""} /></Button>
         </div>

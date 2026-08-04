@@ -29,7 +29,7 @@ export default function SearchPage() {
         actions={<span className="rounded-md bg-muted px-2.5 py-1.5 font-mono text-xs text-muted-foreground">{results.length === 300 ? "300+ matches" : `${results.length} match(es)`}</span>}
       />
       <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-card p-3 shadow-sm">
-        <label className="relative min-w-64 flex-1">
+        <label className="relative min-w-0 flex-1">
           <SearchIcon className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
           <Input
             value={query}
